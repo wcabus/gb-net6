@@ -1,4 +1,4 @@
 ﻿using GB.Core;
 
 var gb = new Gameboy();
-await gb.PowerOn(@"d:\Games\Emulators\GBA\roms\Super Mario Land (World).gb");
+await gb.PowerOn(@"C:\temp\Super Mario Land (World).gb");

@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GB.Core
+﻿namespace GB.Core
 {
     internal class Memory
     {
-        private int[] _bootrom;
+        private readonly int[] _bootrom;
 
         public Memory(Rom rom, BootRomType bootRomType)
         {
@@ -17,18 +11,14 @@ namespace GB.Core
                 : BootRom.DMG;
         }
 
-        public int this[int index]
+        public int Read(int address)
         {
-            get
+            if (address < 0x100)
             {
-                switch (index)
-                {
-                    case int a when a < 0x100:
-                        return _bootrom[index];
-                }
-
-                return 0;
+                return _bootrom[address];
             }
+
+            return 0;
         }
     }
 }

@@ -1,136 +1,45 @@
-﻿namespace GB.Core
+﻿using GB.Core.InstructionSet;
+
+namespace GB.Core
 {
     internal class Cpu
     {
         private readonly Memory _memory;
+        private int _ticks;
 
         private const int Speed = 4_194_304;
+        private const int InterruptReset = 10; // todo 
 
         public Cpu(Memory memory)
         {
             _memory = memory;
-
             Registers = new();
-            Registers.PC = 0x0000;
         }
         
         public void Run(CancellationToken cancellationToken)
         {
-            while (!cancellationToken.IsCancellationRequested)
+            Registers.PC = 0x0000;
+            _ticks = 0;
+
+            for(;;)
             {
-                ExecuteInstruction();
+                var opCode = OpCode.Create(_memory.Read(Registers.PC));
+                opCode.Execute(this);
+
+                _ticks -= opCode.Ticks(); // Number of ticks can depend on the execution of the action
+
+                if (_ticks <= 0)
+                {
+                    // check for interrupts, draw, i/o, ...
+                    _ticks += InterruptReset;
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                }
             }
         }
 
-        private void ExecuteInstruction()
-        {
-            var opcode = _memory[Registers.PC];
-            switch (opcode)
-            {
-                case 0x00:
-                    // NOP
-                    Registers.PC++;
-                    Tick(4);
-                    break;
-
-                case 0xA8:
-                    // XOR B
-                    Xor(Registers.B);
-                    break;
-                case 0xA9:
-                    // XOR C
-                    Xor(Registers.C);
-                    break;
-                case 0xAA:
-                    // XOR D
-                    Xor(Registers.D);
-                    break;
-                case 0xAB:
-                    // XOR E
-                    Xor(Registers.E);
-                    break;
-                case 0xAC:
-                    // XOR H
-                    Xor(Registers.H);
-                    break;
-                case 0xAD:
-                    // XOR L
-                    Xor(Registers.L);
-                    break;
-                case 0xAF:
-                    // XOR A
-                    Xor(Registers.A);
-                    break;
-
-                case 0x01: // LD BC,nnnn
-                    Registers.BC = _memory[Registers.PC + 2] << 8 | _memory[Registers.PC + 1];
-                    Registers.PC += 3;
-                    Tick(12);
-                    break;
-                case 0x11: // LD DE,nnnn
-                    Registers.DE = _memory[Registers.PC + 2] << 8 | _memory[Registers.PC + 1];
-                    Registers.PC += 3;
-                    Tick(12);
-                    break;
-                case 0x21: // LD HL,nnnn
-                    Registers.HL = _memory[Registers.PC + 2] << 8 | _memory[Registers.PC + 1];
-                    Registers.PC += 3;
-                    Tick(12);
-                    break;
-                case 0x31: // LD SP,nnnn
-                    Registers.SP = _memory[Registers.PC + 2] << 8 | _memory[Registers.PC + 1];
-                    Registers.PC += 3;
-                    Tick(12);
-                    break;
-
-                case 0xF9:
-                    // LD SP,HL
-                    Registers.SP = Registers.HL;
-
-                    Registers.PC++;
-                    Tick(8);
-                    break;
-
-                case 0x37:
-                    // SCF
-                    Registers.HalfCarry = false;
-                    Registers.Subtraction = false;
-                    Registers.Carry = true;
-
-                    Registers.PC++;
-                    Tick(4);
-                    break;
-
-                case 0x3F:
-                    // CCF
-                    Registers.HalfCarry = false;
-                    Registers.Subtraction = false;
-                    Registers.Carry ^= true;
-
-                    Registers.PC++;
-                    Tick(4);
-                    break;
-            }
-        }
-
-        private void Xor(int value)
-        {
-            Registers.A ^= value;
-
-            Registers.Zero = Registers.A == 0;
-            Registers.Subtraction = false;
-            Registers.HalfCarry = false;
-            Registers.Carry = false;
-
-            Registers.PC++;
-            Tick(4);
-        }
-
-        private void Tick(int times)
-        {
-
-        }
-        
         public CpuRegisters Registers { get; }
 
         internal record CpuRegisters
