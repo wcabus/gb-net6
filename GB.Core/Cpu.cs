@@ -6,9 +6,10 @@ namespace GB.Core
     {
         private readonly Memory _memory;
         private int _ticks;
-
         private const int Speed = 4_194_304;
         private const int InterruptReset = 10; // todo 
+
+        internal int Prefix = 0x00;
 
         public Cpu(Memory memory)
         {
@@ -23,7 +24,7 @@ namespace GB.Core
 
             for(;;)
             {
-                var opCode = OpCode.Create(_memory.Read(Registers.PC));
+                var opCode = OpCode.Create((Prefix << 8) + _memory.Read(Registers.PC));
                 opCode.Execute(this);
 
                 _ticks -= opCode.Ticks(); // Number of ticks can depend on the execution of the action
