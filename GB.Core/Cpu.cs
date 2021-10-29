@@ -4,39 +4,54 @@ namespace GB.Core
 {
     internal class Cpu
     {
-        private readonly Memory _memory;
-        private int _ticks;
+        internal readonly Memory Memory;
+        private int _cycles;
+        
         private const int Speed = 4_194_304;
+        private const int DividerRegisterTicks = Speed / 16384; // 256
         private const int InterruptReset = 10; // todo 
 
         internal int Prefix = 0x00;
 
         public Cpu(Memory memory)
         {
-            _memory = memory;
+            Memory = memory;
             Registers = new();
         }
         
         public void Run(CancellationToken cancellationToken)
         {
             Registers.PC = 0x0000;
-            _ticks = 0;
+            _cycles = 0;
+            var reduceTicksBy = 0;
+            
+            var lastTimer = DateTimeOffset.UtcNow.Ticks;
+            var now = lastTimer;
 
             for(;;)
             {
-                var opCode = OpCode.Create((Prefix << 8) + _memory.Read(Registers.PC));
+                var opCode = OpCode.Get((Prefix << 8) + Memory.Read(Registers.PC));
                 opCode.Execute(this);
 
-                _ticks -= opCode.Ticks(); // Number of ticks can depend on the execution of the action
+                _cycles += opCode.Cycles(); // Number of cycles can depend on the execution of the action
 
-                if (_ticks <= 0)
+                // check for interrupts, draw, i/o, ...
+                if (_cycles >= DividerRegisterTicks)
                 {
-                    // check for interrupts, draw, i/o, ...
-                    _ticks += InterruptReset;
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
+                    // todo: if stop mode, do nothing
+                    Memory.IncreaseDividerRegister();
+                    reduceTicksBy = DividerRegisterTicks;
+                }
+
+                if (reduceTicksBy > 0)
+                {
+                    _cycles -= reduceTicksBy;
+                    reduceTicksBy = 0;
+                }
+             
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
                 }
             }
         }
@@ -51,6 +66,11 @@ namespace GB.Core
             public int AF
             {
                 get => A << 8 | Flags;
+                set
+                {
+                    A = value >> 8;
+                    Flags = value & 0xF0;
+                }
             }
 
             public bool Zero

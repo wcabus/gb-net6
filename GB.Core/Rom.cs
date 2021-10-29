@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace GB.Core
 {
@@ -31,6 +32,12 @@ namespace GB.Core
             await stream.CopyToAsync(ms);
             
             _romData = new ReadOnlyMemory<byte>(ms.ToArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int Read(int address)
+        {
+            return _romData.Slice(address).Span[0];
         }
 
         public string Title
