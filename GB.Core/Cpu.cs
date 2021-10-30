@@ -17,6 +17,7 @@ namespace GB.Core
         {
             Memory = memory;
             Registers = new();
+            OpCode.Cpu = this;
         }
         
         public void Run(CancellationToken cancellationToken)

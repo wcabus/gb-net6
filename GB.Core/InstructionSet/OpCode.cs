@@ -15,13 +15,12 @@ internal class OpCode
     private readonly bool _immediate;
     private readonly InstructionFlags _flags;
 
-    private string? _toString;
-
     // Operational fields
     private bool _actionTaken = true;
     private bool _reduceCyclesByFour = false;
 
     private static readonly Dictionary<int, OpCode> OpCodes = new();
+    internal static Cpu? Cpu = null;
 
     static OpCode()
     {
@@ -61,8 +60,6 @@ internal class OpCode
         var nFlag = InstructionFlag.Unchanged;
         var hFlag = InstructionFlag.Unchanged;
         var cFlag = InstructionFlag.Unchanged;
-
-        OpCode opCode;
 
         var reader = new Utf8JsonReader(CoreResources.opcodes.AsSpan());
         while (reader.Read())
@@ -223,14 +220,11 @@ internal class OpCode
                     if (depth == 2)
                     {
                         // finished reading an opcode and all its details
-                        if (cyclesIfActionNotTaken.HasValue)
-                        {
-                            opCode = new OpCode(opCodeBytes, mnemonic, bytes, cycles, cyclesIfActionNotTaken.Value, operands, immediate, new InstructionFlags(zFlag, nFlag, hFlag, cFlag));
-                        }
-                        else 
-                        {
-                            opCode = new OpCode(opCodeBytes, mnemonic, bytes, cycles, operands, immediate, new InstructionFlags(zFlag, nFlag, hFlag, cFlag));
-                        }
+                        var opCode = cyclesIfActionNotTaken.HasValue
+                            ? new OpCode(opCodeBytes, mnemonic, bytes, cycles, cyclesIfActionNotTaken.Value, operands,
+                                immediate, new InstructionFlags(zFlag, nFlag, hFlag, cFlag))
+                            : new OpCode(opCodeBytes, mnemonic, bytes, cycles, operands, immediate,
+                                new InstructionFlags(zFlag, nFlag, hFlag, cFlag));
                         
                         OpCodes.Add(opCodeBytes, opCode);
 
@@ -271,33 +265,43 @@ internal class OpCode
 
     public override string ToString()
     {
-        if (_toString is null)
+        var sb = new StringBuilder(_mnemonic);
+        var operandCount = 0;
+        foreach (var operand in _operands)
         {
-            var sb = new StringBuilder(_mnemonic);
-            var operandCount = 0;
-            foreach (var operand in _operands)
+            if (operandCount > 0)
             {
-                if (operandCount > 0)
-                {
-                    sb.Append(',');
-                }
-                sb.Append(' ');
-                if (operand.Immediate)
-                {
-                    sb.AppendFormat("{0}{1}", operand.Name, operand.Increment ? "+" : operand.Decrement ? "-" : "");
-                }
-                else
-                {
-                    sb.AppendFormat("({0}{1})", operand.Name, operand.Increment ? "+" : operand.Decrement ? "-" : "");
-                }
-
-                operandCount++;
+                sb.Append(',');
             }
-            
-            _toString = sb.ToString();
-        }
+            sb.Append(' ');
 
-        return _toString;
+            var operandName = operand.Name;
+            if (Cpu != null)
+            {
+                switch (operand.Name)
+                {
+                    case "a8":
+                    case "r8":
+                    case "d8":
+                        var oneByte = Cpu.Memory.Read(Cpu.Registers.PC + 1);
+                        operandName = oneByte.ToString("X") + "H";
+                        break;
+
+                    case "a16":
+                    case "d16":
+                        var twoBytes = Cpu.Memory.Read(Cpu.Registers.PC + 1) + (Cpu.Memory.Read(Cpu.Registers.PC + 2) << 8);
+                        operandName = twoBytes.ToString("X") + "H";
+                        break;
+                }
+            }
+
+            sb.AppendFormat(operand.Immediate ? "{0}{1}" : "({0}{1})", operandName,
+                operand.Increment ? "+" : operand.Decrement ? "-" : "");
+
+            operandCount++;
+        }
+            
+        return sb.ToString();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -723,7 +727,15 @@ internal class OpCode
     {
         var operand = _operands[0];
         var data = ReadSource(operand, cpu);
-        var newData = (data + 1) & 0xFF;
+        var newData = data + 1;
+        if (operand.Name.Length == 1 || !operand.Immediate)
+        {
+            newData &= 0xFF;
+        }
+        else
+        {
+            newData &= 0xFFFF;
+        }
 
         WriteTarget(operand, newData, cpu);
 
@@ -738,8 +750,16 @@ internal class OpCode
     {
         var operand = _operands[0];
         var data = ReadSource(operand, cpu);
-        var newData = (data - 1) & 0xFF;
-
+        var newData = data - 1;
+        if (operand.Name.Length == 1 || !operand.Immediate)
+        {
+            newData &= 0xFF;
+        }
+        else 
+        {
+            newData &= 0xFFFF;
+        }
+        
         WriteTarget(operand, newData, cpu);
 
         if (operand.Name.Length == 1 || !operand.Immediate)
@@ -1190,22 +1210,22 @@ internal class OpCode
                 cpu.Memory.Write(cpu.Registers.HL & 0xFFFF, data & 0xFF);
                 if (target.Increment)
                 {
-                    cpu.Registers.HL++;
+                    cpu.Registers.HL = (cpu.Registers.HL + 1) & 0xFFFF;
                 }
                 else if (target.Decrement)
                 {
-                    cpu.Registers.HL--;
+                    cpu.Registers.HL = (cpu.Registers.HL - 1) & 0xFFFF;
                 }
                 break;
             case "SP":
                 cpu.Memory.Write(cpu.Registers.SP & 0xFFFF, data & 0xFF);
                 if (target.Increment)
                 {
-                    cpu.Registers.SP++;
+                    cpu.Registers.SP = (cpu.Registers.SP + 1) & 0xFFFF;
                 }
                 else if (target.Decrement)
                 {
-                    cpu.Registers.SP--;
+                    cpu.Registers.SP = (cpu.Registers.SP - 1) & 0xFFFF;
                 }
                 break;
             case "C":
@@ -1255,22 +1275,22 @@ internal class OpCode
                     var hl = cpu.Registers.HL & 0xFFFF;
                     if (source.Increment)
                     {
-                        cpu.Registers.HL++;
+                        cpu.Registers.HL = (cpu.Registers.HL + 1) & 0xFFFF;
                     }
                     else if (source.Decrement)
                     {
-                        cpu.Registers.HL--;
+                        cpu.Registers.HL = (cpu.Registers.HL - 1) & 0xFFFF;
                     }
                     return hl;
                 case "SP":
                     var sp = cpu.Registers.SP & 0xFFFF;
                     if (source.Increment)
                     {
-                        cpu.Registers.SP++;
+                        cpu.Registers.SP = (cpu.Registers.SP + 1) & 0xFFFF;
                     }
                     else if (source.Decrement)
                     {
-                        cpu.Registers.SP--;
+                        cpu.Registers.SP = (cpu.Registers.SP - 1) & 0xFFFF;
                     }
                     return sp;
                 case "d8":
@@ -1297,11 +1317,11 @@ internal class OpCode
                 var hl = cpu.Memory.Read(cpu.Registers.HL & 0xFFFF) & 0xFF;
                 if (source.Increment)
                 {
-                    cpu.Registers.HL++;
+                    cpu.Registers.HL = (cpu.Registers.HL + 1) & 0xFFFF;
                 }
                 else if (source.Decrement)
                 {
-                    cpu.Registers.HL--;
+                    cpu.Registers.HL = (cpu.Registers.HL - 1) & 0xFFFF;
                 }
                 return hl;
             case "C":
