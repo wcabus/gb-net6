@@ -1,4 +1,6 @@
-﻿namespace GB.Core.Graphics
+﻿using System.Runtime.CompilerServices;
+
+namespace GB.Core.Graphics
 {
     internal class TileAttributes
     {
@@ -19,12 +21,25 @@
         }
 
         private TileAttributes(int value) => _value = value;
+        
         public static TileAttributes ValueOf(int value) => Attributes[value];
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsPriority() => (_value & (1 << 7)) != 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsYFlip() => (_value & (1 << 6)) != 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsXFlip() => (_value & (1 << 5)) != 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public GpuRegister GetDmgPalette() => (_value & (1 << 4)) == 0 ? GpuRegister.Obp0 : GpuRegister.Obp1;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetBank() => (_value & (1 << 3)) == 0 ? 0 : 1;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetColorPaletteIndex() => _value & 0x07;
     }
 }

@@ -71,7 +71,7 @@ namespace GB.Core.Cpu
                 return;
             }
 
-            if (State == CpuState.OpCode || State == CpuState.Halted || State == CpuState.Stopped)
+            if (State is CpuState.OpCode or CpuState.Halted or CpuState.Stopped)
             {
                 if (_interruptManager.IsIme() && _interruptManager.IsInterruptRequested())
                 {
@@ -98,7 +98,7 @@ namespace GB.Core.Cpu
                     break;
             }
 
-            if (State == CpuState.Halted || State == CpuState.Stopped)
+            if (State is CpuState.Halted or CpuState.Stopped)
             {
                 return;
             }

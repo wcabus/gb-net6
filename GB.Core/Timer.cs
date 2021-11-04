@@ -1,4 +1,4 @@
-﻿using GB.Core.Cpu;
+using GB.Core.Cpu;
 
 namespace GB.Core
 {

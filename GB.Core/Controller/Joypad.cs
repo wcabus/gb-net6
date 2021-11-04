@@ -5,7 +5,7 @@ namespace GB.Core.Controller
 {
     internal class Joypad : IAddressSpace
     {
-        private readonly ConcurrentDictionary<Button, Button> _buttons = new ConcurrentDictionary<Button, Button>();
+        private readonly ConcurrentDictionary<Button, Button> _buttons = new();
         private int _p1;
 
         public Joypad(InterruptManager interruptManager, IController controller)

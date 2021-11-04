@@ -46,7 +46,7 @@ namespace GB.Core.Serial
 
         public bool Accepts(int address)
         {
-            return address == 0xFF01 || address == 0xFF02;
+            return address is 0xFF01 or 0xFF02;
         }
 
         public void SetByte(int address, int value)
@@ -70,15 +70,12 @@ namespace GB.Core.Serial
             if (address == 0xFF01)
             {
                 return _sb;
-            }
-            else if (address == 0xFF02)
+            } 
+            if (address == 0xFF02)
             {
                 return _sc | 0b01111110;
             }
-            else
-            {
-                throw new ArgumentException();
-            }
+            throw new ArgumentException();
         }
 
         private void StartTransfer()

@@ -268,20 +268,17 @@ namespace GB.Core.Graphics
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetStat()
         {
             return _r.Get(GpuRegister.Stat) | (int)_mode |
                    (_r.Get(GpuRegister.Lyc) == _r.Get(GpuRegister.Ly) ? (1 << 2) : 0) | 0x80;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SetStat(int value)
         {
             _r.Put(GpuRegister.Stat, value & 0b11111000); // last three bits are read-only
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SetLcdc(int value)
         {
             _lcdc.Set(value);
@@ -295,7 +292,6 @@ namespace GB.Core.Graphics
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void DisableLcd()
         {
             _r.Put(GpuRegister.Ly, 0);

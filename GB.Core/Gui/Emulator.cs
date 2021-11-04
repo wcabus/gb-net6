@@ -19,11 +19,8 @@ namespace GB.Core.Gui
         //public GameboyOptions Options { get; set; }
         public bool Active { get; set; }
 
-        private readonly List<Thread> _runnables;
-
         public Emulator(/*GameboyOptions options*/)
         {
-            _runnables = new List<Thread>();
             // Options = options;
         }
 
@@ -45,21 +42,9 @@ namespace GB.Core.Gui
             }
 
             Gameboy = CreateGameboy(rom);
+            new Thread(() => Display.Run(token)).Start();
+            new Thread(() => Gameboy.Run(token)).Start();
 
-            if (Display is IRunnable runnableDisplay)
-            {
-                _runnables.Add(new Thread(() => runnableDisplay.Run(token))
-                {
-                    Priority = ThreadPriority.AboveNormal
-                });
-            }
-
-            _runnables.Add(new Thread(() => Gameboy.Run(token))
-            {
-                Priority = ThreadPriority.AboveNormal
-            });
-
-            _runnables.ForEach(t => t.Start());
             Active = true;
         }
 
@@ -71,7 +56,7 @@ namespace GB.Core.Gui
             }
 
             source.Cancel();
-            _runnables.Clear();
+            Active = false;
         }
 
         public void TogglePause()

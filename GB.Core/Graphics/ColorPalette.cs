@@ -84,7 +84,7 @@ namespace GB.Core.Graphics
 
         public int[] GetPalette(int index)
         {
-            return _palettes[index].ToArray();
+            return _palettes[index];
         }
 
         public override string ToString()

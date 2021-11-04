@@ -16,19 +16,13 @@ namespace GB.Core.Controller
 
         public void OnButtonPress(Button button)
         {
-            if (button != null)
-            {
-                _interruptManager.RequestInterrupt(InterruptManager.InterruptType.P1013);
-                _buttons.TryAdd(button, button);
-            }
+            _interruptManager.RequestInterrupt(InterruptManager.InterruptType.P1013);
+            _buttons.TryAdd(button, button);
         }
 
         public void OnButtonRelease(Button button)
         {
-            if (button != null)
-            {
-                _buttons.TryRemove(button, out _);
-            }
+            _buttons.TryRemove(button, out _);
         }
     }
 }

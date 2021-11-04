@@ -20,7 +20,7 @@ namespace GB.Core.Graphics
 
         private static readonly int[] EmptyPixelLine = new int[8];
 
-        private static readonly State[] SpritesInProgress = new State[] {
+        private static readonly State[] SpritesInProgress = new[] {
             State.ReadSpriteTileId,
             State.ReadSpriteFlags,
             State.ReadSpriteData1,
@@ -130,8 +130,8 @@ namespace GB.Core.Graphics
             {
                 return;
             }
-
-        stateSwitch:
+            
+            stateSwitch:
 
             switch (_state)
             {
