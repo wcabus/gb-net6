@@ -13,9 +13,7 @@ namespace GB.Core
     {
         public const int TicksPerSec = 4_194_304;
 
-        private readonly Mmu _mmu;
         private readonly Processor _cpu;
-        private readonly SpeedMode _speedMode;
 
         private readonly IDisplay _display;
         private readonly Gpu _gpu;
@@ -33,47 +31,47 @@ namespace GB.Core
         {
             _display = display;
             _gbc = cartridge.IsGameboyColor;
-            _speedMode = new SpeedMode();
+            var speedMode = new SpeedMode();
 
             var interruptManager = new InterruptManager(_gbc);
 
-            _timer = new Timer(interruptManager, _speedMode);
-            _mmu = new Mmu();
+            _timer = new Timer(interruptManager, speedMode);
+            var mmu = new Mmu();
 
             var oamRam = new Ram(0xFE00, 0x00A0);
             
-            _dma = new Dma(_mmu, oamRam, _speedMode);
+            _dma = new Dma(mmu, oamRam, speedMode);
             _gpu = new Gpu(_display, interruptManager, _dma, oamRam, _gbc);
-            _hdma = new Hdma(_mmu);
+            _hdma = new Hdma(mmu);
             _sound = new Sound.Sound(soundOutput, _gbc);
-            _serialPort = new SerialPort(interruptManager, serialEndpoint, _speedMode);
+            _serialPort = new SerialPort(interruptManager, serialEndpoint, speedMode);
 
-            _mmu.AddCartridge(cartridge);
-            _mmu.AddGpu(_gpu);
-            _mmu.AddJoypad(new Joypad(interruptManager, controller));
-            _mmu.AddInterruptManager(interruptManager);
-            _mmu.AddSerialPort(_serialPort);
-            _mmu.AddTimer(_timer);
-            _mmu.AddDma(_dma);
-            _mmu.AddSound(_sound);
+            mmu.AddCartridge(cartridge);
+            mmu.AddGpu(_gpu);
+            mmu.AddJoypad(new Joypad(interruptManager, controller));
+            mmu.AddInterruptManager(interruptManager);
+            mmu.AddSerialPort(_serialPort);
+            mmu.AddTimer(_timer);
+            mmu.AddDma(_dma);
+            mmu.AddSound(_sound);
 
-            _mmu.AddFirstRamBank(new Ram(0xC000, 0x1000));
+            mmu.AddFirstRamBank(new Ram(0xC000, 0x1000));
             if (_gbc)
             {
-                _mmu.AddSpeedMode(_speedMode);
-                _mmu.AddHdma(_hdma);
-                _mmu.AddSecondRamBank(new GameboyColorRam());
-                _mmu.AddGbcRegisters(new UndocumentedGbcRegisters());
+                mmu.AddSpeedMode(speedMode);
+                mmu.AddHdma(_hdma);
+                mmu.AddSecondRamBank(new GameboyColorRam());
+                mmu.AddGbcRegisters(new UndocumentedGbcRegisters());
             }
             else
             {
-                _mmu.AddSecondRamBank(new Ram(0xD000, 0x1000));
+                mmu.AddSecondRamBank(new Ram(0xD000, 0x1000));
             }
 
-            _mmu.AddHighRam(new Ram(0xFF80, 0x7F));
-            _mmu.AddShadowRam(new ShadowAddressSpace(_mmu, 0xE000, 0xC000, 0x1E00));
+            mmu.AddHighRam(new Ram(0xFF80, 0x7F));
+            mmu.AddShadowRam(new ShadowAddressSpace(mmu, 0xE000, 0xC000, 0x1E00));
 
-            _cpu = new Processor(_mmu, interruptManager, _gpu, _display, _speedMode);
+            _cpu = new Processor(mmu, interruptManager, _gpu, _display, speedMode);
 
             interruptManager.DisableInterrupts(false);
 
@@ -96,7 +94,6 @@ namespace GB.Core
                 }
 
                 var newMode = Tick();
-                
                 if (newMode.HasValue)
                 {
                     _hdma.OnGpuUpdate(newMode.Value);
@@ -130,8 +127,6 @@ namespace GB.Core
 
         private Gpu.Mode? Tick()
         {
-            _timer.Tick();
-
             if (_hdma.IsTransferInProgress())
             {
                 _hdma.Tick();
@@ -141,6 +136,7 @@ namespace GB.Core
                 _cpu.Tick();
             }
 
+            _timer.Tick();
             _dma.Tick();
             _sound.Tick();
             _serialPort.Tick();

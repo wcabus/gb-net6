@@ -13,6 +13,11 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
+            if (disposing)
+            {
+                _soundOutput.Stop();
+            }
+
             if (disposing && (components != null))
             {
                 components.Dispose();
@@ -35,10 +40,10 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.emulatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this._pictureBox = new System.Windows.Forms.PictureBox();
+            // this._pictureBox = new System.Windows.Forms.PictureBox();
             this._fpsLabel = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._pictureBox)).BeginInit();
+            // ((System.ComponentModel.ISupportInitialize)(this._pictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -100,15 +105,15 @@
             this.pauseToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
             this.pauseToolStripMenuItem.Text = "&Pause";
             this.pauseToolStripMenuItem.CheckedChanged += new System.EventHandler(this.TogglePause);
-            // 
-            // _pictureBox
-            // 
-            this._pictureBox.BackColor = System.Drawing.Color.Black;
-            this._pictureBox.Location = new System.Drawing.Point(0, 27);
-            this._pictureBox.Name = "_pictureBox";
-            this._pictureBox.Size = new System.Drawing.Size(640, 480);
-            this._pictureBox.TabIndex = 1;
-            this._pictureBox.TabStop = false;
+            //// 
+            //// _pictureBox
+            //// 
+            //this._pictureBox.BackColor = System.Drawing.Color.Black;
+            //this._pictureBox.Location = new System.Drawing.Point(0, 27);
+            //this._pictureBox.Name = "_pictureBox";
+            //this._pictureBox.Size = new System.Drawing.Size(640, 480);
+            //this._pictureBox.TabIndex = 1;
+            //this._pictureBox.TabStop = false;
             // 
             // _fpsLabel
             // 
@@ -121,14 +126,14 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 670);
-            this.Controls.Add(this._pictureBox);
+            // this.Controls.Add(this._pictureBox);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.Text = "GB.Net6";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._pictureBox)).EndInit();
+            // ((System.ComponentModel.ISupportInitialize)(this._pictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -143,7 +148,7 @@
         private ToolStripMenuItem exitToolStripMenuItem;
         private ToolStripMenuItem emulatorToolStripMenuItem;
         private ToolStripMenuItem pauseToolStripMenuItem;
-        private PictureBox _pictureBox;
+        // private PictureBox _pictureBox;
         private ToolStripMenuItem _fpsLabel;
     }
 }

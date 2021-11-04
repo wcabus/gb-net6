@@ -1,5 +1,6 @@
 ﻿using GB.Core;
 using GB.Core.Sound;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
@@ -10,7 +11,7 @@ namespace GB.WinForms.OsSpecific
         private const int BufferSize = 1024;
         public const int SampleRate = 22050;
 
-        private byte[] _buffer = new byte[BufferSize];
+        private readonly byte[] _buffer = new byte[BufferSize];
         private int _i;
         private int _tick;
         private readonly int _divider;
@@ -29,6 +30,7 @@ namespace GB.WinForms.OsSpecific
         public void Stop()
         {
             _engine?.Dispose();
+            _engine = null;
         }
 
         public void Play(int left, int right)
@@ -39,11 +41,11 @@ namespace GB.WinForms.OsSpecific
                 return;
             }
 
-            if (left < 0 || left >= 256)
+            if (left is < 0 or >= 256)
             {
                 throw new ArgumentOutOfRangeException(nameof(left));
             }
-            if (right < 0 || right >= 256)
+            if (right is < 0 or >= 256)
             {
                 throw new ArgumentOutOfRangeException(nameof(right));
             }
@@ -60,13 +62,13 @@ namespace GB.WinForms.OsSpecific
 
     public class AudioPlaybackEngine : IDisposable
     {
-        private readonly IWavePlayer _outputDevice;
+        private IWavePlayer _outputDevice;
         private readonly MixingSampleProvider _mixer;
         private readonly BufferedWaveProvider _bufferedWaveProvider;
 
         public AudioPlaybackEngine(int sampleRate = 44100, int channelCount = 2)
         {
-            _outputDevice = new WasapiOut(NAudio.CoreAudioApi.AudioClientShareMode.Shared, 30);
+            _outputDevice = new WasapiOut(AudioClientShareMode.Shared, 100);
             _mixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channelCount))
             {
                 ReadFully = true
@@ -119,7 +121,9 @@ namespace GB.WinForms.OsSpecific
 
         public void Dispose()
         {
+            _outputDevice.Stop();
             _outputDevice.Dispose();
+            _outputDevice = null;
         }
     }
 

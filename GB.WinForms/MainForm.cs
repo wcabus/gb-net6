@@ -2,40 +2,37 @@ using GB.Core.Controller;
 using GB.Core.Gui;
 using Button = GB.Core.Controller.Button;
 using GB.WinForms.OsSpecific;
-using System.Timers;
+using GB.Core.Sound;
 
 namespace GB.WinForms
 {
     public partial class MainForm : Form, IController
     {
         private IButtonListener? _listener;
-
+        
         private readonly Dictionary<Keys, Button> _controls;
         private CancellationTokenSource _cancellation;
 
-        private BitmapDisplay _display = new();
-        private Emulator _emulator;
-
-        private readonly object _updateLock = new object();
-
-        private uint _frames = 0;
-
-        private System.Timers.Timer _fpsTimer = new System.Timers.Timer(1000);
+        private readonly BitmapDisplay _display = new();
+        private readonly ISoundOutput _soundOutput = new SoundOutput();
+        private readonly Emulator _emulator;
 
         public MainForm()
         {
             _emulator = new Emulator
             {
                 Display = _display,
-                SoundOutput = new SoundOutput()
+                SoundOutput = _soundOutput
             };
 
             InitializeComponent();
 
-            _pictureBox.Top = menuStrip1.Height;
-            _pictureBox.Width = BitmapDisplay.DisplayWidth * 5;
-            _pictureBox.Height = BitmapDisplay.DisplayHeight * 5;
-            _pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+            // _pictureBox
+            _display.Top = menuStrip1.Height;
+            _display.Width = BitmapDisplay.DisplayWidth * 5;
+            _display.Height = BitmapDisplay.DisplayHeight * 5;
+            Controls.Add(_display);
+            // _display.SizeMode = PictureBoxSizeMode.Zoom;
 
             _controls = new Dictionary<Keys, Button>
             {
@@ -43,64 +40,47 @@ namespace GB.WinForms
                 {Keys.D, Button.Right},
                 {Keys.W, Button.Up},
                 {Keys.S, Button.Down},
-                {Keys.NumPad4, Button.A},
-                {Keys.NumPad8, Button.B},
+                {Keys.K, Button.A},
+                {Keys.O, Button.B},
                 {Keys.Enter, Button.Start},
                 {Keys.Back, Button.Select}
             };
 
-            Height = menuStrip1.Height + _pictureBox.Height + 50;
-            Width = _pictureBox.Width;
-
             _cancellation = new CancellationTokenSource();
 
             _emulator.Controller = this;
-            _emulator.Display.OnFrameProduced += UpdateDisplay;
+            // _emulator.Display.OnFrameProduced += UpdateDisplay;
 
+            Load += (sender, args) =>
+            {
+                Height = menuStrip1.Height + _display.Height + 50;
+                Width = _display.Width;
+            };
             KeyDown += OnKeyDown;
             KeyUp += OnKeyUp;
             Closed += (_, e) => { _cancellation.Cancel(); };
-
-            _fpsTimer.AutoReset = true;
-            _fpsTimer.Elapsed += OnFpsTimerElapsed;
         }
 
         public void SetButtonListener(IButtonListener listener) => _listener = listener;
 
-        private void UpdateDisplay(object _, EventArgs __)
+        private void StopEmulator()
         {
-            if (Monitor.TryEnter(_updateLock))
+            if (!_emulator.Active)
             {
-                try
-                {
-                    _pictureBox.Image = Image.FromStream(_display.GetFrame());
-                    Interlocked.Increment(ref _frames);
-                }
-                finally
-                {
-                    Monitor.Exit(_updateLock);
-                }
+                return;
             }
-        }
 
-        private void OnFpsTimerElapsed(object? sender, ElapsedEventArgs e)
-        {
-            var frames = Interlocked.Exchange(ref _frames, 0);
-            _fpsLabel.Text = "FPS: " + frames.ToString();
+            _emulator.Stop(_cancellation);
+            _soundOutput.Stop();
+
+            _cancellation = new CancellationTokenSource();
+            _display.DisplayEnabled = false;
+            Thread.Sleep(100);
         }
 
         private void OpenRom(object sender, EventArgs e)
         {
-            if (_emulator.Active)
-            {
-                _fpsTimer.Stop();
-                _fpsLabel.Text = "FPS: ";
-
-                _emulator.Stop(_cancellation);
-                _cancellation = new CancellationTokenSource();
-                _pictureBox.Image = null;
-                Thread.Sleep(100);
-            }
+            StopEmulator();
 
             using var openFileDialog = new OpenFileDialog
             {
@@ -117,7 +97,6 @@ namespace GB.WinForms
             {
                 _emulator.RomPath = romPath;
                 _emulator.Run(_cancellation.Token);
-                _fpsTimer.Start();
             }
         }
 
@@ -126,7 +105,7 @@ namespace GB.WinForms
             _emulator.TogglePause();
         }
 
-        private void OnKeyDown(object sender, KeyEventArgs e)
+        private void OnKeyDown(object? sender, KeyEventArgs e)
         {
             var button = _controls.ContainsKey(e.KeyCode) ? _controls[e.KeyCode] : null;
             if (button != null)
@@ -135,7 +114,7 @@ namespace GB.WinForms
             }
         }
 
-        private void OnKeyUp(object sender, KeyEventArgs e)
+        private void OnKeyUp(object? sender, KeyEventArgs e)
         {
             var button = _controls.ContainsKey(e.KeyCode) ? _controls[e.KeyCode] : null;
             if (button != null)
@@ -152,10 +131,16 @@ namespace GB.WinForms
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            if (_pictureBox == null) return;
 
-            _pictureBox.Width = Width;
-            _pictureBox.Height = Height - menuStrip1.Height - 50;
+            _display.Width = Width;
+            _display.Height = Height - menuStrip1.Height - 50;
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            StopEmulator();
+
+            base.OnFormClosing(e);
         }
     }
 }

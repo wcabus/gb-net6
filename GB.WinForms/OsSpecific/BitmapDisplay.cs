@@ -1,29 +1,46 @@
 ﻿using GB.Core.Graphics;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using Image = System.Drawing.Image;
 
 namespace GB.WinForms.OsSpecific
 {
-    internal class BitmapDisplay : IDisplay
+    public class BitmapDisplay : Control, IDisplay
     {
         public static readonly int DisplayWidth = 160;
         public static readonly int DisplayHeight = 144;
+        public static readonly float AspectRatio = DisplayWidth / (DisplayHeight * 1f);
 
         public static readonly int[] Colors = { 0xe6f8da, 0x99c886, 0x437969, 0x051f2a };
 
-        private readonly GameboyDisplayFrame _frame = new();
         private readonly int[] _rgb;
-        private int _doRefresh;
+        private readonly MemoryStream _imageStream = new();
+        private readonly Image<Rgba32> _imageBuffer = new(DisplayWidth, DisplayHeight);
+
+        private bool _doStop;
+        private bool _doRefresh;
         private int _i;
 
-        private long _ticks;
+        private readonly object _lockObject = new();
 
         public event EventHandler OnFrameProduced = (_, _) => { };
 
         public BitmapDisplay()
         {
             _rgb = new int[DisplayWidth * DisplayHeight];
+            SetStyle(ControlStyles.Opaque | ControlStyles.Selectable, false);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.SupportsTransparentBackColor, true);
+
+            TabStop = false;
         }
 
-        public bool Enabled { get; set; }
+        bool IDisplay.Enabled
+        {
+            get => DisplayEnabled;
+            set => DisplayEnabled = value;
+        }
+
+        public bool DisplayEnabled { get; set; }
 
         public void PutDmgPixel(int color)
         {
@@ -33,6 +50,10 @@ namespace GB.WinForms.OsSpecific
 
         public void PutColorPixel(int gbcRgb)
         {
+            if (_i >= _rgb.Length)
+            {
+                return;
+            }
             _rgb[_i++] = TranslateGbcRgb(gbcRgb);
         }
 
@@ -47,59 +68,131 @@ namespace GB.WinForms.OsSpecific
             return result;
         }
 
-        public void RequestRefresh() => Interlocked.Exchange(ref _doRefresh, 1);
+        public void RequestRefresh()
+        {
+            lock (_lockObject)
+            {
+                _doRefresh = true;
+                Monitor.PulseAll(_lockObject);
+            }
+        }
 
         public void WaitForRefresh()
         {
-            // while (_doRefresh) => fill buffer with pixel data
-            while (Interlocked.CompareExchange(ref _doRefresh, 1, 1) == 1)
+            lock (_lockObject)
             {
-                continue;
+                while (_doRefresh)
+                {
+                    try
+                    {
+                        Monitor.Wait(_lockObject, 1);
+                    }
+                    catch (ThreadInterruptedException)
+                    {
+                        break;
+                    }
+                }
             }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(() => OnPaint(e));
+                return;
+            }
+
+            base.OnPaint(e);
+
+            var width = ClientRectangle.Width;
+            var height = ClientRectangle.Height;
+            if (width >= height)
+            {
+                height = (int)Math.Floor(width / AspectRatio);
+            }
+            else
+            {
+                width = (int)Math.Floor(height * AspectRatio);
+            }
+
+            try
+            {
+                if (DisplayEnabled)
+                {
+                    _imageStream.Seek(0, SeekOrigin.Begin);
+                    _imageBuffer.SaveAsBmp(_imageStream);
+                    using var img = Image.FromStream(_imageStream);
+                    e.Graphics.DrawImage(img, 0, 0, width, height);
+                }
+                else
+                {
+                    using var brush = new SolidBrush(System.Drawing.Color.FromArgb(0xe6f8da));
+                    e.Graphics.FillRectangle(brush, 0, 0, width, height);
+                }
+            }
+            catch (ObjectDisposedException) {}
         }
 
         public void Run(CancellationToken token)
         {
-            Interlocked.Exchange(ref _doRefresh, 0);
-            _ticks = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            Enabled = true;
+            _doStop = false;
+            _doRefresh = false;
+            DisplayEnabled = true;
 
-            while (!token.IsCancellationRequested)
+            var ticksPerFrame = (int)Math.Floor(1000 / 59.0);
+            var lastUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+            while (!_doStop)
             {
-                // if (!_doRefresh)
-                if (Interlocked.CompareExchange(ref _doRefresh, 0, 0) == 0)
+                while (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() < (lastUpdate + ticksPerFrame))
                 {
                     continue;
                 }
+                lastUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                RefreshScreen();
-                Interlocked.Exchange(ref _doRefresh, 0);
-            }
-        }
-
-        public Stream GetFrame()
-        {
-            return _frame.ToBitmap();
-        }
-
-        private void RefreshScreen()
-        {
-            _frame.SetPixels(_rgb);
-
-            var ticks = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            var elapsed = ticks - _ticks;
-            if (elapsed > 0)
-            {
-                var sleep = (int)((1000 / 60.0) - elapsed);
-                if (sleep > 0)
+                lock (_lockObject)
                 {
-                    Thread.Sleep(sleep);
+                    try
+                    {
+                        Monitor.Wait(_lockObject, 1);
+                    }
+                    catch (ThreadInterruptedException)
+                    {
+                        break;
+                    }
                 }
-            }
 
-            _ticks = ticks;
-            OnFrameProduced?.Invoke(this, EventArgs.Empty);
-            _i = 0;
+                if (_doRefresh)
+                {
+                    FillAndDrawBuffer();
+
+                    lock (_lockObject)
+                    {
+                        _i = 0;
+                        _doRefresh = false;
+                        Monitor.PulseAll(_lockObject);
+                    }
+                }
+
+                _doStop = token.IsCancellationRequested;
+            }
+        }
+
+        private void FillAndDrawBuffer()
+        {
+            try 
+            {
+                var pi = 0;
+                while (pi < _rgb.Length)
+                {
+                    var (r, g, b) = _rgb[pi].ToRgb();
+                    _imageBuffer[pi % DisplayWidth, pi++ / DisplayWidth] = new Rgba32((byte)r, (byte)g, (byte)b, 255);
+                }
+
+                Invalidate();
+            }
+            catch (ObjectDisposedException) { }
         }
     }
 }
