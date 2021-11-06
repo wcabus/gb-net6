@@ -70,7 +70,7 @@ namespace GB.WinForms
 
             using var openFileDialog = new OpenFileDialog
             {
-                Filter = "Gameboy ROM (*.gb)|*.gb| All files(*.*) |*.*",
+                Filter = "Gameboy ROM (*.gb;*.gbc)|*.gb;*.gbc| All files(*.*) |*.*",
                 FilterIndex = 0,
                 RestoreDirectory = true
             };
