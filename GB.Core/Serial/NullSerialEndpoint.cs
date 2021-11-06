@@ -2,9 +2,10 @@
 {
     public class NullSerialEndpoint : ISerialEndpoint
     {
+        public bool ExternalClockPulsed() => false;
         public int Transfer(int outgoing)
         {
-            return 0;
+            return (outgoing << 1) & 0xFF;
         }
     }
 }

@@ -13,6 +13,7 @@ namespace GB.WinForms
         private readonly Dictionary<Keys, Button> _controls;
         private CancellationTokenSource _cancellation;
 
+        // private readonly ISoundOutput _soundOutput = new NullSoundOutput();
         private readonly ISoundOutput _soundOutput = new SoundOutput();
         private readonly Emulator _emulator;
 

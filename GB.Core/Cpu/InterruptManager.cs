@@ -138,6 +138,19 @@ namespace GB.Core.Cpu
                 Ordinal = ordinal;
             }
 
+            public override string ToString()
+            {
+                return Ordinal switch
+                {
+                    0 => "VBlank",
+                    1 => "LCD STAT",
+                    2 => "Timer",
+                    3 => "Serial",
+                    4 => "Joypad",
+                    _ => "Invalid Interrupt!"
+                };
+            }
+
             public static IEnumerable<InterruptType> Values
             {
                 get
