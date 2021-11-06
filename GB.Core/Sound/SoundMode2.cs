@@ -24,14 +24,12 @@
             _volumeEnvelope.Start();
         }
 
-
         protected override void Trigger()
         {
             _i = 0;
             _freqDivider = 1;
             _volumeEnvelope.Trigger();
         }
-
 
         public override int TickChannel()
         {

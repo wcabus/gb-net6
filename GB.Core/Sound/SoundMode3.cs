@@ -189,7 +189,7 @@ namespace GB.Core.Sound
             }
             else
             {
-                b &= 0x0f;
+                b &= 0x0F;
             }
 
             return GetVolume() switch
