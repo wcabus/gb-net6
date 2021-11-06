@@ -44,7 +44,7 @@ namespace GB.Core
             _gpu = new Gpu(_display, interruptManager, _dma, oamRam, _gbc);
             _hdma = new Hdma(mmu);
             _sound = new Sound.Sound(soundOutput, _gbc);
-            _serialPort = new SerialPort(interruptManager, serialEndpoint, speedMode);
+            _serialPort = new SerialPort(interruptManager, serialEndpoint, speedMode, _gbc);
 
             mmu.AddCartridge(cartridge);
             mmu.AddGpu(_gpu);

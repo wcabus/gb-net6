@@ -8,16 +8,18 @@ namespace GB.Core.Serial
         private readonly ISerialEndpoint _serialEndpoint;
         private readonly InterruptManager _interruptManager;
         private readonly SpeedMode _speedMode;
+        private readonly bool _gbc;
         private int _sb;
         private int _sc;
         private int _divider;
         private int _shiftClock;
 
-        public SerialPort(InterruptManager interruptManager, ISerialEndpoint serialEndpoint, SpeedMode speedMode)
+        public SerialPort(InterruptManager interruptManager, ISerialEndpoint serialEndpoint, SpeedMode speedMode, bool gbc)
         {
             _interruptManager = interruptManager;
             _serialEndpoint = serialEndpoint;
             _speedMode = speedMode;
+            _gbc = gbc;
         }
 
         public void Tick()
@@ -87,7 +89,7 @@ namespace GB.Core.Serial
             } 
             if (address == 0xFF02)
             {
-                return _sc | 0b01111100;
+                return _sc | (_gbc ? 0b01111100 : 0b01111110);
             }
             throw new ArgumentException();
         }
