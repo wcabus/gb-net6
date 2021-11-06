@@ -7,8 +7,7 @@
         private int _i;
         private readonly VolumeEnvelope _volumeEnvelope;
 
-        public SoundMode2(bool gbc)
-            : base(0xff15, 64, gbc)
+        public SoundMode2(bool gbc) : base(0xFF15, 64, gbc)
         {
             _volumeEnvelope = new VolumeEnvelope();
         }
@@ -34,7 +33,7 @@
         }
 
 
-        public override int Tick()
+        public override int TickChannel()
         {
             _volumeEnvelope.Tick();
 

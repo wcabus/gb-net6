@@ -1,4 +1,4 @@
-﻿using GB.Core.Controller;
+using GB.Core.Controller;
 using GB.Core.Cpu;
 using GB.Core.Graphics;
 using GB.Core.Gui;

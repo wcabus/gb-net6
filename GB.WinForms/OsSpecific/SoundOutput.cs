@@ -1,6 +1,5 @@
 ﻿using GB.Core;
 using GB.Core.Sound;
-using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
@@ -12,7 +11,7 @@ namespace GB.WinForms.OsSpecific
         public const int SampleRate = 22050;
 
         private readonly byte[] _buffer = new byte[BufferSize];
-        private int _i;
+        private int _i = 0;
         private int _tick;
         private readonly int _divider;
         private AudioPlaybackEngine? _engine;
@@ -41,21 +40,18 @@ namespace GB.WinForms.OsSpecific
                 return;
             }
 
-            if (left is < 0 or >= 256)
-            {
-                throw new ArgumentOutOfRangeException(nameof(left));
-            }
-            if (right is < 0 or >= 256)
-            {
-                throw new ArgumentOutOfRangeException(nameof(right));
-            }
-
-            _buffer[_i++] = (byte)left;
-            _buffer[_i++] = (byte)right;
+            _buffer[_i++] = (byte)(left);
+            _buffer[_i++] = (byte)(right);
             if (_i > BufferSize / 2)
             {
                 _engine?.PlaySound(_buffer, 0, _i);
                 _i = 0;
+            }
+
+            // wait until audio is done playing this data
+            while (_engine?.GetQueuedAudioLength() > BufferSize)
+            {
+                Thread.Sleep(0);
             }
         }
     }
@@ -68,7 +64,7 @@ namespace GB.WinForms.OsSpecific
 
         public AudioPlaybackEngine(int sampleRate = 44100, int channelCount = 2)
         {
-            _outputDevice = new WasapiOut(AudioClientShareMode.Shared, 100);
+            _outputDevice = new WasapiOut();
             _mixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channelCount))
             {
                 ReadFully = true
@@ -83,6 +79,11 @@ namespace GB.WinForms.OsSpecific
             AddMixerInput(_bufferedWaveProvider.ToSampleProvider());
             _outputDevice.Init(_mixer);
             _outputDevice.Play();
+        }
+
+        public int GetQueuedAudioLength()
+        {
+            return _bufferedWaveProvider.BufferedBytes;
         }
 
         public void PlaySound(byte[] buffer, int offset, int count)

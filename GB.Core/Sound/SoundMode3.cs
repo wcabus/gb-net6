@@ -135,7 +135,7 @@ namespace GB.Core.Sound
             }
         }
 
-        public override int Tick()
+        public override int TickChannel()
         {
             _ticksSinceRead++;
             if (!UpdateLength())

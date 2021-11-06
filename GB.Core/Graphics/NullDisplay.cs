@@ -4,8 +4,6 @@
     {
         public bool Enabled { get; set; }
 
-        public event EventHandler OnFrameProduced = (_, _) => { };
-
         public void PutDmgPixel(int color)
         {
         }

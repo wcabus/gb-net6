@@ -8,7 +8,7 @@
         private readonly FrequencySweep _frequencySweep;
         private readonly VolumeEnvelope _volumeEnvelope;
 
-        public SoundMode1(bool gbc) : base(0xff10, 64, gbc)
+        public SoundMode1(bool gbc) : base(0xFF10, 64, gbc)
         {
             _frequencySweep = new FrequencySweep();
             _volumeEnvelope = new VolumeEnvelope();
@@ -34,7 +34,7 @@
             _volumeEnvelope.Trigger();
         }
 
-        public override int Tick()
+        public override int TickChannel()
         {
             _volumeEnvelope.Tick();
 

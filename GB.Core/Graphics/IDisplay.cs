@@ -6,8 +6,6 @@ namespace GB.Core.Graphics
     {
         bool Enabled { get; set; }
 
-        event EventHandler OnFrameProduced;
-
         void PutDmgPixel(int color);
         void PutColorPixel(int gbcRgb);
         void RequestRefresh();

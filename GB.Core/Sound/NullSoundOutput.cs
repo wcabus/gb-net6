@@ -1,4 +1,4 @@
-﻿namespace GB.Core.Sound
+namespace GB.Core.Sound
 {
     public class NullSoundOutput : ISoundOutput
     {

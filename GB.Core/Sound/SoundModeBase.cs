@@ -28,7 +28,7 @@
             Gbc = gbc;
         }
 
-        public abstract int Tick();
+        public abstract int TickChannel();
         protected abstract void Trigger();
 
         public bool IsEnabled() => ChannelEnabled && DacEnabled;

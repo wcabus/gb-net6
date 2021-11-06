@@ -1,6 +1,7 @@
 ﻿using GB.Core.Graphics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using System.Runtime.CompilerServices;
 using Image = System.Drawing.Image;
 
 namespace GB.WinForms.OsSpecific
@@ -23,14 +24,13 @@ namespace GB.WinForms.OsSpecific
 
         private readonly object _lockObject = new();
 
-        public event EventHandler OnFrameProduced = (_, _) => { };
-
         public BitmapDisplay()
         {
             _rgb = new int[DisplayWidth * DisplayHeight];
             SetStyle(ControlStyles.Opaque | ControlStyles.Selectable, false);
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.SupportsTransparentBackColor, true);
 
+            BackColor = System.Drawing.Color.FromArgb(Colors[0]);
             TabStop = false;
         }
 
@@ -107,13 +107,26 @@ namespace GB.WinForms.OsSpecific
 
             var width = ClientRectangle.Width;
             var height = ClientRectangle.Height;
-            if (width >= height)
+            var aspectRatio = width * 1f / height;
+
+            if (aspectRatio <= AspectRatio)
             {
                 height = (int)Math.Floor(width / AspectRatio);
             }
             else
             {
                 width = (int)Math.Floor(height * AspectRatio);
+            }
+
+            var x = 0;
+            var y = 0;
+            if (width < ClientRectangle.Width)
+            {
+                x += (ClientRectangle.Width - width) / 2;
+            }
+            else
+            {
+                y += (ClientRectangle.Height - height) / 2;
             }
 
             try
@@ -123,12 +136,13 @@ namespace GB.WinForms.OsSpecific
                     _imageStream.Seek(0, SeekOrigin.Begin);
                     _imageBuffer.SaveAsBmp(_imageStream);
                     using var img = Image.FromStream(_imageStream);
-                    e.Graphics.DrawImage(img, 0, 0, width, height);
+
+                    e.Graphics.DrawImage(img, x, y, width, height);
                 }
                 else
                 {
                     using var brush = new SolidBrush(System.Drawing.Color.FromArgb(0xe6f8da));
-                    e.Graphics.FillRectangle(brush, 0, 0, width, height);
+                    e.Graphics.FillRectangle(brush, x, y, width, height);
                 }
             }
             catch (ObjectDisposedException) {}
@@ -140,17 +154,8 @@ namespace GB.WinForms.OsSpecific
             _doRefresh = false;
             DisplayEnabled = true;
 
-            var ticksPerFrame = (int)Math.Floor(1000 / 59.0);
-            var lastUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
             while (!_doStop)
             {
-                while (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() < (lastUpdate + ticksPerFrame))
-                {
-                    continue;
-                }
-                lastUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
                 lock (_lockObject)
                 {
                     try
@@ -186,13 +191,22 @@ namespace GB.WinForms.OsSpecific
                 var pi = 0;
                 while (pi < _rgb.Length)
                 {
-                    var (r, g, b) = _rgb[pi].ToRgb();
+                    var (r, g, b) = ToRgb(_rgb[pi]);
                     _imageBuffer[pi % DisplayWidth, pi++ / DisplayWidth] = new Rgba32((byte)r, (byte)g, (byte)b, 255);
                 }
 
                 Invalidate();
             }
             catch (ObjectDisposedException) { }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static (int, int, int) ToRgb(int pixel)
+        {
+            var b = pixel & 255;
+            var g = (pixel >> 8) & 255;
+            var r = (pixel >> 16) & 255;
+            return (r, g, b);
         }
     }
 }

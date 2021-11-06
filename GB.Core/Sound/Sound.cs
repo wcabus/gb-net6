@@ -16,9 +16,9 @@ namespace GB.Core.Sound
         };
 
         private readonly SoundModeBase[] _allModes = new SoundModeBase[4];
-        private readonly Ram _ram = new Ram(0xFF24, 0x03);
-        private readonly ISoundOutput _output;
         private readonly int[] _channels = new int[4];
+        private readonly Ram _ram = new(0xFF24, 0x03);
+        private readonly ISoundOutput _output;
         private readonly bool[] _overridenEnabled = { true, true, true, true };
         private bool _enabled;
 
@@ -41,11 +41,11 @@ namespace GB.Core.Sound
             for (var i = 0; i < _allModes.Length; i++)
             {
                 var abstractSoundMode = _allModes[i];
-                var channel = abstractSoundMode.Tick();
+                var channel = abstractSoundMode.TickChannel();
                 _channels[i] = channel;
             }
 
-            var selection = _ram.GetByte(0xFF25);
+            var selection = _ram.GetByte(0xff25);
             var left = 0;
             var right = 0;
             for (var i = 0; i < 4; i++)
@@ -69,7 +69,7 @@ namespace GB.Core.Sound
             left /= 4;
             right /= 4;
 
-            var volumes = _ram.GetByte(0xFF24);
+            var volumes = _ram.GetByte(0xff24);
             left *= ((volumes >> 4) & 0b111);
             right *= (volumes & 0b111);
 

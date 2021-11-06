@@ -5,7 +5,7 @@
         private int _lastResult;
         private readonly VolumeEnvelope _volumeEnvelope;
         private readonly PolynomialCounter _polynomialCounter;
-        private readonly Lfsr _lfsr = new Lfsr();
+        private readonly Lfsr _lfsr = new();
 
         public SoundMode4(bool gbc) : base(0xFF1F, 64, gbc)
         {
@@ -32,7 +32,7 @@
             _volumeEnvelope.Trigger();
         }
 
-        public override int Tick()
+        public override int TickChannel()
         {
             _volumeEnvelope.Tick();
 

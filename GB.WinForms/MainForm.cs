@@ -13,26 +13,18 @@ namespace GB.WinForms
         private readonly Dictionary<Keys, Button> _controls;
         private CancellationTokenSource _cancellation;
 
-        private readonly BitmapDisplay _display = new();
         private readonly ISoundOutput _soundOutput = new SoundOutput();
         private readonly Emulator _emulator;
 
         public MainForm()
         {
+            InitializeComponent();
+
             _emulator = new Emulator
             {
                 Display = _display,
                 SoundOutput = _soundOutput
             };
-
-            InitializeComponent();
-
-            // _pictureBox
-            _display.Top = menuStrip1.Height;
-            _display.Width = BitmapDisplay.DisplayWidth * 5;
-            _display.Height = BitmapDisplay.DisplayHeight * 5;
-            Controls.Add(_display);
-            // _display.SizeMode = PictureBoxSizeMode.Zoom;
 
             _controls = new Dictionary<Keys, Button>
             {
@@ -49,13 +41,7 @@ namespace GB.WinForms
             _cancellation = new CancellationTokenSource();
 
             _emulator.Controller = this;
-            // _emulator.Display.OnFrameProduced += UpdateDisplay;
-
-            Load += (sender, args) =>
-            {
-                Height = menuStrip1.Height + _display.Height + 50;
-                Width = _display.Width;
-            };
+            
             KeyDown += OnKeyDown;
             KeyUp += OnKeyUp;
             Closed += (_, e) => { _cancellation.Cancel(); };
@@ -126,14 +112,6 @@ namespace GB.WinForms
         private void OnExit(object sender, EventArgs e)
         {
             Close();
-        }
-
-        protected override void OnResize(EventArgs e)
-        {
-            base.OnResize(e);
-
-            _display.Width = Width;
-            _display.Height = Height - menuStrip1.Height - 50;
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
