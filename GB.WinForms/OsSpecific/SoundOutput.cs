@@ -40,8 +40,11 @@ namespace GB.WinForms.OsSpecific
                 return;
             }
 
-            _buffer[_i++] = (byte)(left);
-            _buffer[_i++] = (byte)(right);
+            left = left < 0 ? 0 : (left > 255 ? 255 : left);
+            right = right < 0 ? 0 : (right > 255 ? 255 : right);
+
+            _buffer[_i++] = (byte)left;
+            _buffer[_i++] = (byte)right;
             if (_i > BufferSize / 2)
             {
                 _engine?.PlaySound(_buffer, 0, _i);

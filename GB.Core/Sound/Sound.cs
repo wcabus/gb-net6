@@ -66,9 +66,6 @@ namespace GB.Core.Sound
                 }
             }
 
-            left /= 4;
-            right /= 4;
-
             var volumes = _ram.GetByte(0xFF24);
             left *= (volumes >> 4) & 0b111;
             right *= volumes & 0b111;
