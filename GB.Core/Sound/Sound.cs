@@ -1,4 +1,4 @@
-﻿using GB.Core.Memory;
+using GB.Core.Memory;
 
 namespace GB.Core.Sound
 {
@@ -199,6 +199,6 @@ namespace GB.Core.Sound
             }
         }
 
-        public void EnableChannel(int i, bool enabled) => _overridenEnabled[i] = enabled;
+        public void ToggleChannel(int i) => _overridenEnabled[i] = !_overridenEnabled[i];
     }
 }

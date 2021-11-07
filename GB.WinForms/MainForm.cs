@@ -121,5 +121,32 @@ namespace GB.WinForms
 
             base.OnFormClosing(e);
         }
+
+        private void ToggleSoundChannel(object sender, EventArgs e)
+        {
+            var channel = 0;
+            if (sender == _toggleChannel1)
+            {
+                channel = 1;
+            }
+            else if (sender == _toggleChannel2)
+            {
+                channel = 2;
+            }
+            else if (sender == _toggleChannel3)
+            {
+                channel = 3;
+            }
+            else if (sender == _toggleChannel4)
+            {
+                channel = 4;
+            }
+            if (channel is < 1 or > 4)
+            {
+                return;
+            }
+
+            _emulator.ToggleSoundChannel(channel);
+        }
     }
 }

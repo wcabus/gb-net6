@@ -80,6 +80,11 @@ namespace GB.Core
             // cartridge.SetByte(0xFF50, 0xFF);
         }
 
+        public void ToggleSoundChannel(int channel)
+        {
+            _sound.ToggleChannel(channel - 1);
+        }
+
         public void Run(CancellationToken cancellationToken)
         {
             var requestedScreenRefresh = false;

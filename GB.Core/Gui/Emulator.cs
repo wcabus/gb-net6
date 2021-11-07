@@ -59,6 +59,11 @@ namespace GB.Core.Gui
             Active = false;
         }
 
+        public void ToggleSoundChannel(int channel)
+        {
+            Gameboy?.ToggleSoundChannel(channel);
+        }
+
         public void TogglePause()
         {
             if (Gameboy != null)
