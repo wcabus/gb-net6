@@ -70,7 +70,7 @@ namespace GB.Core.Sound
             left *= (volumes >> 4) & 0b111;
             right *= volumes & 0b111;
 
-            _output.Play((byte)left, (byte)right);
+            _output.Play(left, right);
         }
 
         private IAddressSpace? GetAddressSpace(int address)
