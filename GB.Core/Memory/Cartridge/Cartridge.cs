@@ -1,20 +1,29 @@
 ﻿using GB.Core.Memory.Cartridge.Battery;
 using GB.Core.Memory.Cartridge.Type;
+using System;
+using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace GB.Core.Memory.Cartridge
 {
-    public class Cartridge : IAddressSpace
+    public class Cartridge : IAddressSpace, IDisposable
     {
-        private int[] _romData = new int[0];
+        private int[] _romData = Array.Empty<int>();
         private IAddressSpace? _addressSpace;
 
         private int _dmgBootstrap = 0; // use boot rom
 
         private string _title = "";
-        private string _licensee = "";        
-        
-        private Cartridge() { }
+        private string _licensee = "";
+        private readonly string _cartridgeFilePath;
+
+        private IBattery _battery;
+
+        private Cartridge(string cartridgeFilePath) 
+        {
+            _cartridgeFilePath = cartridgeFilePath;
+        }
 
         public static Cartridge? FromFile(string path)
         {
@@ -24,7 +33,7 @@ namespace GB.Core.Memory.Cartridge
             }
 
             using var stream = File.OpenRead(path);
-            var cartridge = new Cartridge();
+            var cartridge = new Cartridge(path);
             cartridge.Initialize(stream);
 
             return cartridge;
@@ -47,24 +56,23 @@ namespace GB.Core.Memory.Cartridge
                 ramBanks = 1;
             }
 
-            // todo battery support
-            var battery = new NullBattery();
+            _battery = new FileBattery(this);
 
             if (type.IsMbc1())
             {
-                _addressSpace = new Mbc1(_romData, type, battery, romBanks, ramBanks);
+                _addressSpace = new Mbc1(_romData, type, _battery, romBanks, ramBanks);
             }
             else if (type.IsMbc2())
             {
-                _addressSpace = new Mbc2(_romData, type, battery, romBanks);
+                _addressSpace = new Mbc2(_romData, type, _battery, romBanks);
             }
             else if (type.IsMbc3())
             {
-                _addressSpace = new Mbc3(_romData, type, battery, romBanks, ramBanks);
+                _addressSpace = new Mbc3(_romData, type, _battery, romBanks, ramBanks);
             }
             else if (type.IsMbc5())
             {
-                _addressSpace = new Mbc5(_romData, type, battery, romBanks, ramBanks);
+                _addressSpace = new Mbc5(_romData, type, _battery, romBanks, ramBanks);
             }
             else
             {
@@ -81,6 +89,25 @@ namespace GB.Core.Memory.Cartridge
                     break;
                 default: // universal
                     IsGameboyColor = true; // could potentially be overwritten by a global setting
+                    break;
+            }
+        }
+
+        public void SaveRam()
+        {
+            switch (_addressSpace)
+            {
+                case Mbc1 mbc1:
+                    mbc1.SaveRam();
+                    break;
+                case Mbc2 mbc2:
+                    mbc2.SaveRam();
+                    break;
+                case Mbc3 mbc3:
+                    mbc3.SaveRam();
+                    break;
+                case Mbc5 mbc5:
+                    mbc5.SaveRam();
                     break;
             }
         }
@@ -115,6 +142,8 @@ namespace GB.Core.Memory.Cartridge
         }
 
         public bool IsGameboyColor { get; private set; }
+
+        public string FilePath => _cartridgeFilePath;
 
         public string Title
         {
@@ -197,6 +226,11 @@ namespace GB.Core.Memory.Cartridge
                 4 => 16,
                 _ => throw new ArgumentException($"Unsupported RAM size: 0x{id:X}")
             };
+        }
+
+        public void Dispose()
+        {
+            _battery.Dispose();
         }
     }
 }

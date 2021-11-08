@@ -1,6 +1,6 @@
 ﻿namespace GB.Core.Memory.Cartridge.Battery
 {
-    internal interface IBattery
+    internal interface IBattery : IDisposable
     {
         void LoadRam(int[] ram);
         void SaveRam(int[] ram);

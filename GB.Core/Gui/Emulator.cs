@@ -8,6 +8,7 @@ namespace GB.Core.Gui
 {
     public class Emulator : IRunnable
     {
+        private Cartridge? _cartridge;
         public string? RomPath { get; set; }
         public Gameboy? Gameboy { get; set; }
         
@@ -35,13 +36,13 @@ namespace GB.Core.Gui
                 throw new ArgumentException("Please choose a ROM.");
             }
 
-            var rom = Cartridge.FromFile(RomPath);
-            if (rom is null)
+            _cartridge = Cartridge.FromFile(RomPath);
+            if (_cartridge is null)
             {
                 throw new ArgumentException("The ROM path doesn't exist or points to an invalid ROM file: " + RomPath);
             }
 
-            Gameboy = CreateGameboy(rom);
+            Gameboy = CreateGameboy(_cartridge);
             new Thread(() => Display.Run(token)).Start();
             new Thread(() => Gameboy.Run(token)).Start();
 
@@ -57,6 +58,9 @@ namespace GB.Core.Gui
 
             source.Cancel();
             Active = false;
+            
+            _cartridge?.SaveRam();
+            _cartridge?.Dispose();
         }
 
         public void ToggleSoundChannel(int channel)

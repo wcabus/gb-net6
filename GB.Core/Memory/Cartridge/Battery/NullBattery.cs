@@ -17,5 +17,7 @@
         public void SaveRamWithClock(int[] ram, long[] clockData)
         {
         }
+
+        public void Dispose() { }
     }
 }

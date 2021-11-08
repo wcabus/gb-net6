@@ -1,4 +1,5 @@
 ﻿using GB.Core.Memory.Cartridge.Battery;
+using System;
 
 namespace GB.Core.Memory.Cartridge.Type
 {
@@ -40,6 +41,11 @@ namespace GB.Core.Memory.Cartridge.Type
             battery.LoadRam(_ram);
         }
 
+        public void SaveRam()
+        {
+            _battery.SaveRam(_ram);
+        }
+
         public bool Accepts(int address)
         {
             return (address >= 0x0000 && address < 0x8000) ||
@@ -53,7 +59,7 @@ namespace GB.Core.Memory.Cartridge.Type
                 _ramWriteEnabled = (value & 0b1111) == 0b1010;
                 if (!_ramWriteEnabled)
                 {
-                    _battery.SaveRam(_ram);
+                    SaveRam();
                 }
             }
             else if (address >= 0x2000 && address < 0x4000)
