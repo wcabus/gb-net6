@@ -40,8 +40,8 @@ namespace GB.WinForms.OsSpecific
                 return;
             }
 
-            //left = (int)(left * 0.5);
-            //right = (int)(right * 0.5);
+            left = (int)(left * 0.25);
+            right = (int)(right * 0.25);
 
             left = left < 0 ? 0 : (left > 255 ? 255 : left);
             right = right < 0 ? 0 : (right > 255 ? 255 : right);
