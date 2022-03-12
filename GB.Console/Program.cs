@@ -5,11 +5,11 @@ using GB.Core.Memory.Cartridge;
 using GB.Core.Serial;
 using GB.Core.Sound;
 
-var cartridge = Cartridge.FromFile(@"C:\temp\Super Mario Land (World).gb");
+var cartridge = await Cartridge.FromFile(@"C:\temp\Super Mario Land (World).gb");
 if (cartridge == null)
 {
     return;
 }
 
 var gb = new Gameboy(cartridge, new NullDisplay(), new NullController(), new NullSoundOutput(), new NullSerialEndpoint());
-gb.Run(CancellationToken.None);
+await gb.Run(CancellationToken.None);

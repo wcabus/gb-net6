@@ -6,7 +6,7 @@ using Image = System.Drawing.Image;
 
 namespace GB.WinForms.OsSpecific
 {
-    public class BitmapDisplay : Control, IDisplay
+    public sealed class BitmapDisplay : Control, IDisplay
     {
         public static readonly int DisplayWidth = 160;
         public static readonly int DisplayHeight = 144;
@@ -33,6 +33,8 @@ namespace GB.WinForms.OsSpecific
             BackColor = System.Drawing.Color.FromArgb(Colors[0]);
             TabStop = false;
         }
+
+        public bool HasGameloop => false;
 
         bool IDisplay.Enabled
         {
@@ -148,7 +150,7 @@ namespace GB.WinForms.OsSpecific
             catch (ObjectDisposedException) {}
         }
 
-        public void Run(CancellationToken token)
+        public Task Run(CancellationToken token)
         {
             _doStop = false;
             _doRefresh = false;
@@ -182,6 +184,8 @@ namespace GB.WinForms.OsSpecific
 
                 _doStop = token.IsCancellationRequested;
             }
+
+            return Task.CompletedTask;
         }
 
         private void FillAndDrawBuffer()

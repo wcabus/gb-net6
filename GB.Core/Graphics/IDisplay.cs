@@ -5,6 +5,7 @@ namespace GB.Core.Graphics
     public interface IDisplay : IRunnable
     {
         bool Enabled { get; set; }
+        bool HasGameloop { get; }
 
         void PutDmgPixel(int color);
         void PutColorPixel(int gbcRgb);

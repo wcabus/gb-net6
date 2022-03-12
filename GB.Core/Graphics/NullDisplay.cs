@@ -3,6 +3,7 @@
     public class NullDisplay : IDisplay
     {
         public bool Enabled { get; set; }
+        public bool HasGameloop => false;
 
         public void PutDmgPixel(int color)
         {
@@ -20,8 +21,9 @@
         {
         }
 
-        public void Run(CancellationToken token)
+        public Task Run(CancellationToken token)
         {
+            return Task.CompletedTask;
         }
     }
 }

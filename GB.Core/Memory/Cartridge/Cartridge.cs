@@ -1,8 +1,5 @@
 ﻿using GB.Core.Memory.Cartridge.Battery;
 using GB.Core.Memory.Cartridge.Type;
-using System;
-using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace GB.Core.Memory.Cartridge
@@ -25,24 +22,32 @@ namespace GB.Core.Memory.Cartridge
             _cartridgeFilePath = cartridgeFilePath;
         }
 
-        public static Cartridge? FromFile(string path)
+        public static async Task<Cartridge?> FromFile(string path)
         {
             if (!File.Exists(path)) 
             {
                 return null; 
             }
 
-            using var stream = File.OpenRead(path);
+            await using var stream = File.OpenRead(path);
             var cartridge = new Cartridge(path);
-            cartridge.Initialize(stream);
+            await cartridge.Initialize(stream);
 
             return cartridge;
         }
 
-        private void Initialize(FileStream stream)
+        public static async Task<Cartridge?> FromStream(string name, Stream romStream)
         {
-            using var ms = new MemoryStream();
-            stream.CopyTo(ms);
+            var cartridge = new Cartridge(name);
+            await cartridge.Initialize(romStream);
+
+            return cartridge;
+        }
+
+        private async Task Initialize(Stream stream)
+        {
+            await using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
 
             _romData = ms.ToArray().Select(x => (int)x).ToArray();
 

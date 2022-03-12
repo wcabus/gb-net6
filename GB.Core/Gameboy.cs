@@ -75,9 +75,9 @@ namespace GB.Core
 
             interruptManager.DisableInterrupts(false);
 
-            // uncomment to  skip bootstrap
-            // _cpu.InitializeRegisters(_gbc);
-            // cartridge.SetByte(0xFF50, 0xFF);
+            // uncomment to skip bootstrap
+            _cpu.InitializeRegisters(_gbc);
+            cartridge.SetByte(0xFF50, 0xFF);
         }
 
         public void ToggleSoundChannel(int channel)
@@ -85,7 +85,7 @@ namespace GB.Core
             _sound.ToggleChannel(channel - 1);
         }
 
-        public void Run(CancellationToken cancellationToken)
+        public async Task Run(CancellationToken cancellationToken)
         {
             var requestedScreenRefresh = false;
             var lcdDisabled = false;
@@ -94,39 +94,44 @@ namespace GB.Core
             {
                 if (Paused)
                 {
-                    Thread.Sleep(1000);
+                    await Task.Delay(1000, cancellationToken);
                     continue;
                 }
 
-                var newMode = Tick();
-                if (newMode.HasValue)
-                {
-                    _hdma.OnGpuUpdate(newMode.Value);
-                }
+                RunOnce(ref requestedScreenRefresh, ref lcdDisabled);
+            }
+        }
 
-                if (!lcdDisabled && !_gpu.IsLcdEnabled())
-                {
-                    lcdDisabled = true;
-                    _display.RequestRefresh();
-                    _hdma.OnLcdSwitch(false);
-                }
-                else if (newMode == Gpu.Mode.VBlank)
-                {
-                    requestedScreenRefresh = true;
-                    _display.RequestRefresh();
-                }
+        public void RunOnce(ref bool requestedScreenRefresh, ref bool lcdDisabled)
+        {
+            var newMode = Tick();
+            if (newMode.HasValue)
+            {
+                _hdma.OnGpuUpdate(newMode.Value);
+            }
 
-                if (lcdDisabled && _gpu.IsLcdEnabled())
-                {
-                    lcdDisabled = false;
-                    _display.WaitForRefresh();
-                    _hdma.OnLcdSwitch(true);
-                }
-                else if (requestedScreenRefresh && newMode == Gpu.Mode.OamSearch)
-                {
-                    requestedScreenRefresh = false;
-                    _display.WaitForRefresh();
-                }
+            if (!lcdDisabled && !_gpu.IsLcdEnabled())
+            {
+                lcdDisabled = true;
+                _display.RequestRefresh();
+                _hdma.OnLcdSwitch(false);
+            }
+            else if (newMode == Gpu.Mode.VBlank)
+            {
+                requestedScreenRefresh = true;
+                _display.RequestRefresh();
+            }
+
+            if (lcdDisabled && _gpu.IsLcdEnabled())
+            {
+                lcdDisabled = false;
+                _display.WaitForRefresh();
+                _hdma.OnLcdSwitch(true);
+            }
+            else if (requestedScreenRefresh && newMode == Gpu.Mode.OamSearch)
+            {
+                requestedScreenRefresh = false;
+                _display.WaitForRefresh();
             }
         }
 

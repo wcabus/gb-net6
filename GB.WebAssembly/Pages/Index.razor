@@ -1,0 +1,25 @@
+﻿@page "/"
+@using BlazorWorker.Core
+@inject IWorkerFactory workerFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Hello</h1>
+
+@if (!ViewModel.IsRunning)
+{
+    <div class="mb-3">
+        <label for="file" class="form-label">ROM file:</label>
+        <InputFile OnChange="@LoadRom" class="form-control" id="file"/>
+    </div>
+}
+else
+{
+    <div class="mb-3">
+        <button class="btn btn-warning" @onclick="StopEmulator">Stop</button>
+    </div>
+}
+<div id="game-canvas">
+    <BECanvas @ref="_canvas" Width="320" Height="288"/>
+</div>
+<img class="d-none" @ref="_renderTarget" src="@ImageBytes"/>

@@ -2,6 +2,6 @@
 {
     public interface IRunnable
     {
-        void Run(CancellationToken token);
+        Task Run(CancellationToken token);
     }
 }
