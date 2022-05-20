@@ -1,4 +1,5 @@
-﻿using GB.Core.Graphics;
+﻿using System.Drawing.Drawing2D;
+using GB.Core.Graphics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Runtime.CompilerServices;
@@ -28,7 +29,9 @@ namespace GB.WinForms.OsSpecific
         {
             _rgb = new int[DisplayWidth * DisplayHeight];
             SetStyle(ControlStyles.Opaque | ControlStyles.Selectable, false);
-            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.SupportsTransparentBackColor, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | 
+                     ControlStyles.SupportsTransparentBackColor |
+                     ControlStyles.AllPaintingInWmPaint, true);
 
             BackColor = System.Drawing.Color.FromArgb(Colors[0]);
             TabStop = false;
@@ -102,6 +105,9 @@ namespace GB.WinForms.OsSpecific
                 Invoke(() => OnPaint(e));
                 return;
             }
+
+            e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+            e.Graphics.PixelOffsetMode = PixelOffsetMode.HighSpeed;
 
             base.OnPaint(e);
 
