@@ -9,6 +9,8 @@ namespace GB.Core.Gui
     public class Emulator : IRunnable
     {
         private Cartridge? _cartridge;
+
+        public bool EnableBootRom { get; set; } = true;
         public string? RomPath { get; set; }
         public Gameboy? Gameboy { get; set; }
         
@@ -78,7 +80,7 @@ namespace GB.Core.Gui
 
         private Gameboy CreateGameboy(Cartridge rom)
         {
-            return new Gameboy(rom, Display, Controller, SoundOutput, new NullSerialEndpoint());
+            return new Gameboy(rom, Display, Controller, SoundOutput, new NullSerialEndpoint(), EnableBootRom);
         }
     }
 }

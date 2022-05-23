@@ -82,6 +82,7 @@ namespace GB.WinForms
 
             if (success && !string.IsNullOrEmpty(romPath))
             {
+                _emulator.EnableBootRom = enableBootROMToolStripMenuItem.Checked;
                 _emulator.RomPath = romPath;
                 _emulator.Run(_cancellation.Token);
             }

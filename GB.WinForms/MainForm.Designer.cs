@@ -1,4 +1,4 @@
-﻿namespace GB.WinForms
+namespace GB.WinForms
 {
     partial class MainForm
     {
@@ -41,6 +41,7 @@
             this.emulatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.soundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.enableBootROMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._toggleChannel1 = new System.Windows.Forms.ToolStripMenuItem();
             this._toggleChannel2 = new System.Windows.Forms.ToolStripMenuItem();
             this._toggleChannel3 = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,7 +59,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(12, 4, 0, 4);
-            this.menuStrip1.Size = new System.Drawing.Size(1600, 44);
+            this.menuStrip1.Size = new System.Drawing.Size(1600, 46);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -69,7 +70,7 @@
             this.toolStripMenuItem1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(71, 36);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(71, 38);
             this.fileToolStripMenuItem.Text = "&File";
             // 
             // openROMToolStripMenuItem
@@ -97,9 +98,10 @@
             // 
             this.emulatorToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.pauseToolStripMenuItem,
-            this.soundToolStripMenuItem});
+            this.soundToolStripMenuItem,
+            this.enableBootROMToolStripMenuItem});
             this.emulatorToolStripMenuItem.Name = "emulatorToolStripMenuItem";
-            this.emulatorToolStripMenuItem.Size = new System.Drawing.Size(129, 36);
+            this.emulatorToolStripMenuItem.Size = new System.Drawing.Size(129, 38);
             this.emulatorToolStripMenuItem.Text = "&Emulator";
             // 
             // pauseToolStripMenuItem
@@ -122,13 +124,22 @@
             this.soundToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
             this.soundToolStripMenuItem.Text = "&Sound";
             // 
+            // enableBootROMToolStripMenuItem
+            // 
+            this.enableBootROMToolStripMenuItem.Checked = true;
+            this.enableBootROMToolStripMenuItem.CheckOnClick = true;
+            this.enableBootROMToolStripMenuItem.CheckState = CheckState.Checked;
+            this.enableBootROMToolStripMenuItem.Name = "enableBootROMToolStripMenuItem";
+            this.enableBootROMToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
+            this.enableBootROMToolStripMenuItem.Text = "Enable &Boot ROM";
+            // 
             // _toggleChannel1
             // 
             this._toggleChannel1.Checked = true;
             this._toggleChannel1.CheckOnClick = true;
             this._toggleChannel1.CheckState = System.Windows.Forms.CheckState.Checked;
             this._toggleChannel1.Name = "_toggleChannel1";
-            this._toggleChannel1.Size = new System.Drawing.Size(359, 44);
+            this._toggleChannel1.Size = new System.Drawing.Size(255, 44);
             this._toggleChannel1.Text = "Channel &1";
             this._toggleChannel1.CheckedChanged += new System.EventHandler(this.ToggleSoundChannel);
             // 
@@ -138,7 +149,7 @@
             this._toggleChannel2.CheckOnClick = true;
             this._toggleChannel2.CheckState = System.Windows.Forms.CheckState.Checked;
             this._toggleChannel2.Name = "_toggleChannel2";
-            this._toggleChannel2.Size = new System.Drawing.Size(359, 44);
+            this._toggleChannel2.Size = new System.Drawing.Size(255, 44);
             this._toggleChannel2.Text = "Channel &2";
             this._toggleChannel2.CheckedChanged += new System.EventHandler(this.ToggleSoundChannel);
             // 
@@ -148,7 +159,7 @@
             this._toggleChannel3.CheckOnClick = true;
             this._toggleChannel3.CheckState = System.Windows.Forms.CheckState.Checked;
             this._toggleChannel3.Name = "_toggleChannel3";
-            this._toggleChannel3.Size = new System.Drawing.Size(359, 44);
+            this._toggleChannel3.Size = new System.Drawing.Size(255, 44);
             this._toggleChannel3.Text = "Channel &3";
             this._toggleChannel3.CheckedChanged += new System.EventHandler(this.ToggleSoundChannel);
             // 
@@ -158,7 +169,7 @@
             this._toggleChannel4.CheckOnClick = true;
             this._toggleChannel4.CheckState = System.Windows.Forms.CheckState.Checked;
             this._toggleChannel4.Name = "_toggleChannel4";
-            this._toggleChannel4.Size = new System.Drawing.Size(359, 44);
+            this._toggleChannel4.Size = new System.Drawing.Size(255, 44);
             this._toggleChannel4.Text = "Channel &4";
             this._toggleChannel4.CheckedChanged += new System.EventHandler(this.ToggleSoundChannel);
             // 
@@ -207,5 +218,6 @@
         private ToolStripMenuItem _toggleChannel2;
         private ToolStripMenuItem _toggleChannel3;
         private ToolStripMenuItem _toggleChannel4;
+        private ToolStripMenuItem enableBootROMToolStripMenuItem;
     }
 }

@@ -27,7 +27,7 @@ namespace GB.Core
 
         public bool Paused { get; set; }
 
-        public Gameboy(Cartridge cartridge, IDisplay display, IController controller, ISoundOutput soundOutput, ISerialEndpoint serialEndpoint)
+        public Gameboy(Cartridge cartridge, IDisplay display, IController controller, ISoundOutput soundOutput, ISerialEndpoint serialEndpoint, bool enableBootRom = true)
         {
             _display = display;
             _gbc = cartridge.IsGameboyColor;
@@ -75,9 +75,13 @@ namespace GB.Core
 
             interruptManager.DisableInterrupts(false);
 
-            // uncomment to  skip bootstrap
-            // _cpu.InitializeRegisters(_gbc);
-            // cartridge.SetByte(0xFF50, 0xFF);
+            if (enableBootRom)
+            {
+                return;
+            }
+
+            _cpu.InitializeRegisters(_gbc);
+            cartridge.SetByte(0xFF50, 0xFF);
         }
 
         public void ToggleSoundChannel(int channel)
