@@ -5,7 +5,7 @@
         private readonly int[] _ram = new int[7 * 0x1000];
         private int _svbk;
 
-        public bool Accepts(int address) => address == 0xFF70 || (address >= 0xD000 && address < 0xE000);
+        public bool Accepts(int address) => address is 0xFF70 or >= 0xD000 and < 0xE000;
 
         public void SetByte(int address, int value)
         {

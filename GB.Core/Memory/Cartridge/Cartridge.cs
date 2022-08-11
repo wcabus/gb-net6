@@ -1,8 +1,5 @@
 ﻿using GB.Core.Memory.Cartridge.Battery;
 using GB.Core.Memory.Cartridge.Type;
-using System;
-using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace GB.Core.Memory.Cartridge
@@ -78,19 +75,6 @@ namespace GB.Core.Memory.Cartridge
             {
                 _addressSpace = new Rom(_romData, type, romBanks, ramBanks);
             }
-
-            switch (gameboyType)
-            {
-                case GameboyType.Standard:
-                    IsGameboyColor = false;
-                    break;
-                case GameboyType.GameboyColor:
-                    IsGameboyColor = true;
-                    break;
-                default: // universal
-                    IsGameboyColor = true; // could potentially be overwritten by a global setting
-                    break;
-            }
         }
 
         public void SaveRam()
@@ -141,7 +125,7 @@ namespace GB.Core.Memory.Cartridge
             return address == 0xFF50 ? 0xFF : _addressSpace!.GetByte(address);
         }
 
-        public bool IsGameboyColor { get; private set; }
+        public bool IsGameboyColor => GameboyType != GameboyType.Standard;
 
         public string FilePath => _cartridgeFilePath;
 

@@ -20,6 +20,9 @@ namespace GB.WinForms
         public MainForm()
         {
             InitializeComponent();
+            autodetectToolStripMenuItem.Tag = GameBoyMode.AutoDetect;
+            dMGClassicToolStripMenuItem.Tag = GameBoyMode.DMG;
+            gameBoyColorToolStripMenuItem.Tag = GameBoyMode.Color;
 
             _emulator = new Emulator
             {
@@ -148,6 +151,30 @@ namespace GB.WinForms
             }
 
             _emulator.ToggleSoundChannel(channel);
+        }
+
+        private void GameBoyModeClicked(object sender, EventArgs e)
+        {
+            if (sender is not ToolStripMenuItem clickedToolStripMenuItem)
+            {
+                return;
+            }
+
+            if (clickedToolStripMenuItem.CheckState == CheckState.Checked)
+            {
+                // Don't act if the user clicks on an already checked menu item
+                return;
+            }
+
+            // Reset all three
+            autodetectToolStripMenuItem.CheckState = CheckState.Unchecked;
+            dMGClassicToolStripMenuItem.CheckState = CheckState.Unchecked;
+            gameBoyColorToolStripMenuItem.CheckState = CheckState.Unchecked;
+
+            // Check the sender
+            clickedToolStripMenuItem.CheckState = CheckState.Checked;
+
+            _emulator.GameBoyMode = (GameBoyMode)clickedToolStripMenuItem.Tag;
         }
     }
 }

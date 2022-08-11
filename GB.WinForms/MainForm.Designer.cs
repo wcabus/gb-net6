@@ -41,12 +41,17 @@ namespace GB.WinForms
             this.emulatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.soundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.enableBootROMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._toggleChannel1 = new System.Windows.Forms.ToolStripMenuItem();
             this._toggleChannel2 = new System.Windows.Forms.ToolStripMenuItem();
             this._toggleChannel3 = new System.Windows.Forms.ToolStripMenuItem();
             this._toggleChannel4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.enableBootROMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._display = new GB.WinForms.OsSpecific.BitmapDisplay();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
+            this.gameBoyModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autodetectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dMGClassicToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gameBoyColorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -99,7 +104,9 @@ namespace GB.WinForms
             this.emulatorToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.pauseToolStripMenuItem,
             this.soundToolStripMenuItem,
-            this.enableBootROMToolStripMenuItem});
+            this.toolStripMenuItem2,
+            this.enableBootROMToolStripMenuItem,
+            this.gameBoyModeToolStripMenuItem});
             this.emulatorToolStripMenuItem.Name = "emulatorToolStripMenuItem";
             this.emulatorToolStripMenuItem.Size = new System.Drawing.Size(129, 38);
             this.emulatorToolStripMenuItem.Text = "&Emulator";
@@ -123,15 +130,6 @@ namespace GB.WinForms
             this.soundToolStripMenuItem.Name = "soundToolStripMenuItem";
             this.soundToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
             this.soundToolStripMenuItem.Text = "&Sound";
-            // 
-            // enableBootROMToolStripMenuItem
-            // 
-            this.enableBootROMToolStripMenuItem.Checked = true;
-            this.enableBootROMToolStripMenuItem.CheckOnClick = true;
-            this.enableBootROMToolStripMenuItem.CheckState = CheckState.Checked;
-            this.enableBootROMToolStripMenuItem.Name = "enableBootROMToolStripMenuItem";
-            this.enableBootROMToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
-            this.enableBootROMToolStripMenuItem.Text = "Enable &Boot ROM";
             // 
             // _toggleChannel1
             // 
@@ -173,17 +171,64 @@ namespace GB.WinForms
             this._toggleChannel4.Text = "Channel &4";
             this._toggleChannel4.CheckedChanged += new System.EventHandler(this.ToggleSoundChannel);
             // 
+            // enableBootROMToolStripMenuItem
+            // 
+            this.enableBootROMToolStripMenuItem.Checked = true;
+            this.enableBootROMToolStripMenuItem.CheckOnClick = true;
+            this.enableBootROMToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.enableBootROMToolStripMenuItem.Name = "enableBootROMToolStripMenuItem";
+            this.enableBootROMToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
+            this.enableBootROMToolStripMenuItem.Text = "Enable &Boot ROM";
+            // 
             // _display
             // 
             this._display.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(230)))), ((int)(((byte)(248)))), ((int)(((byte)(218)))));
             this._display.DisplayEnabled = false;
             this._display.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._display.Location = new System.Drawing.Point(0, 44);
+            this._display.Location = new System.Drawing.Point(0, 46);
             this._display.Name = "_display";
-            this._display.Size = new System.Drawing.Size(1600, 1296);
+            this._display.Size = new System.Drawing.Size(1600, 1294);
             this._display.TabIndex = 1;
             this._display.TabStop = false;
             this._display.Text = "Game Boy Display";
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(356, 6);
+            // 
+            // gameBoyModeToolStripMenuItem
+            // 
+            this.gameBoyModeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.autodetectToolStripMenuItem,
+            this.dMGClassicToolStripMenuItem,
+            this.gameBoyColorToolStripMenuItem});
+            this.gameBoyModeToolStripMenuItem.Name = "gameBoyModeToolStripMenuItem";
+            this.gameBoyModeToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
+            this.gameBoyModeToolStripMenuItem.Text = "Game Boy &Mode";
+            // 
+            // autodetectToolStripMenuItem
+            // 
+            this.autodetectToolStripMenuItem.Checked = true;
+            this.autodetectToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.autodetectToolStripMenuItem.Name = "autodetectToolStripMenuItem";
+            this.autodetectToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
+            this.autodetectToolStripMenuItem.Text = "&Auto-detect";
+            this.autodetectToolStripMenuItem.Click += new System.EventHandler(this.GameBoyModeClicked);
+            // 
+            // dMGClassicToolStripMenuItem
+            // 
+            this.dMGClassicToolStripMenuItem.Name = "dMGClassicToolStripMenuItem";
+            this.dMGClassicToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
+            this.dMGClassicToolStripMenuItem.Text = "&DMG (Classic)";
+            this.dMGClassicToolStripMenuItem.Click += new System.EventHandler(this.GameBoyModeClicked);
+            // 
+            // gameBoyColorToolStripMenuItem
+            // 
+            this.gameBoyColorToolStripMenuItem.Name = "gameBoyColorToolStripMenuItem";
+            this.gameBoyColorToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
+            this.gameBoyColorToolStripMenuItem.Text = "Game Boy &Color";
+            this.gameBoyColorToolStripMenuItem.Click += new System.EventHandler(this.GameBoyModeClicked);
             // 
             // MainForm
             // 
@@ -219,5 +264,10 @@ namespace GB.WinForms
         private ToolStripMenuItem _toggleChannel3;
         private ToolStripMenuItem _toggleChannel4;
         private ToolStripMenuItem enableBootROMToolStripMenuItem;
+        private ToolStripSeparator toolStripMenuItem2;
+        private ToolStripMenuItem gameBoyModeToolStripMenuItem;
+        private ToolStripMenuItem autodetectToolStripMenuItem;
+        private ToolStripMenuItem dMGClassicToolStripMenuItem;
+        private ToolStripMenuItem gameBoyColorToolStripMenuItem;
     }
 }

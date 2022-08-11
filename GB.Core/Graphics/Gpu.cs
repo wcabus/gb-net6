@@ -67,9 +67,9 @@ namespace GB.Core.Graphics
         {
             switch (address)
             {
-                case int v when 0x8000 <= v && v <= 0x9FFF:
+                case >= 0x8000 and <= 0x9FFF:
                     return GetVideoRam();
-                case int o when 0xFE00 <= o && o <= 0xFE9F && !_dma.IsOamBlocked():
+                case >= 0xFE00 and <= 0xFE9F when !_dma.IsOamBlocked():
                     return _oamRam;
                 case 0xFF40:
                     return _lcdc;

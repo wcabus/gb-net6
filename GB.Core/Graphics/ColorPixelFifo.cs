@@ -52,7 +52,7 @@
                 var oldPriority = _priorities.Get(i);
 
                 var put = false;
-                if ((oldPriority == -1 || oldPriority == 100) && !_lcdc.IsBgAndWindowDisplay())
+                if (oldPriority is -1 or 100 && !_lcdc.IsBgAndWindowDisplay())
                 {
                     // this one takes precedence
                     put = true;
@@ -72,7 +72,7 @@
                     // bg without priority
                     put = true;
                 }
-                else if (oldPriority >= 0 && oldPriority < 10)
+                else if (oldPriority is >= 0 and < 10)
                 {
                     // other sprite
                     put = oldPriority > oamIndex;
@@ -96,7 +96,7 @@
 
         private int GetColor(int priority, int palette, int color)
         {
-            return priority >= 0 && priority < 10
+            return priority is >= 0 and < 10
                 ? _oamPalette.GetPalette(palette)[color]
                 : _bgPalette.GetPalette(palette)[color];
         }
