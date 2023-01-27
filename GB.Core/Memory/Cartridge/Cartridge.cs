@@ -17,6 +17,10 @@ namespace GB.Core.Memory.Cartridge
 
         private IBattery _battery;
 
+        private Cartridge() : this("")
+        {
+        }
+
         private Cartridge(string cartridgeFilePath) 
         {
             _cartridgeFilePath = cartridgeFilePath;
@@ -36,7 +40,15 @@ namespace GB.Core.Memory.Cartridge
             return cartridge;
         }
 
-        private void Initialize(FileStream stream)
+        public static Cartridge FromStream(Stream stream)
+        {
+            var cartridge = new Cartridge();
+            cartridge.Initialize(stream);
+
+            return cartridge;
+        }
+
+        private void Initialize(Stream stream)
         {
             using var ms = new MemoryStream();
             stream.CopyTo(ms);

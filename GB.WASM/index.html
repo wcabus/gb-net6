@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!--  Licensed to the .NET Foundation under one or more agreements. -->
+<!-- The .NET Foundation licenses this file to you under the MIT license. -->
+<html>
+
+<head>
+  <title>GB.WASM</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="modulepreload" href="./main.js" />
+  <link rel="modulepreload" href="./dotnet.js" />
+  <style>
+      .main {
+          width: 100%;
+          height: 100%;
+      }
+
+      .flex-center {
+          display: flex;
+          height: 100vh;
+          flex: 1;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .viewport {
+          border: 2px solid #051f2a;
+          background: #e6f8da;
+      }
+  </style>
+</head>
+
+<body class="main">
+    <div class="flex-center">
+        <canvas id="viewport" width="640" height="576" class="viewport"></canvas>
+    </div>
+    <script type='module' src="./main.js"></script>
+</body>
+
+</html>

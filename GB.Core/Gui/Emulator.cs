@@ -14,6 +14,8 @@ namespace GB.Core.Gui
         public GameBoyMode GameBoyMode { get; set; } = GameBoyMode.AutoDetect;
 
         public string? RomPath { get; set; }
+        public Stream? RomStream { get; set; }
+
         public Gameboy? Gameboy { get; set; }
         
         public IDisplay Display { get; set; } = new NullDisplay();
@@ -35,12 +37,20 @@ namespace GB.Core.Gui
             //{
             //    throw new ArgumentException("The ROM path doesn't exist: " + Options.RomFile);
             //}
-            if (string.IsNullOrEmpty(RomPath))
+            if (string.IsNullOrEmpty(RomPath) && RomStream is null)
             {
                 throw new ArgumentException("Please choose a ROM.");
             }
 
-            _cartridge = Cartridge.FromFile(RomPath);
+            if (!string.IsNullOrEmpty(RomPath))
+            {
+                _cartridge = Cartridge.FromFile(RomPath);
+            }
+            else if (RomStream != null)
+            {
+                _cartridge = Cartridge.FromStream(RomStream);
+            }
+
             if (_cartridge is null)
             {
                 throw new ArgumentException("The ROM path doesn't exist or points to an invalid ROM file: " + RomPath);
@@ -65,6 +75,11 @@ namespace GB.Core.Gui
             
             _cartridge?.SaveRam();
             _cartridge?.Dispose();
+
+            RomPath = null;
+
+            RomStream?.Dispose();
+            RomStream = null;
         }
 
         public void ToggleSoundChannel(int channel)

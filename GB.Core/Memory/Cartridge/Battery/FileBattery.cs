@@ -6,10 +6,17 @@ namespace GB.Core.Memory.Cartridge.Battery
     internal class FileBattery : IBattery
     {
         private readonly string _ramFilePath;
-        private readonly FileStream _file;
+        private readonly FileStream? _file;
 
         public FileBattery(Cartridge cartridge)
         {
+            if (string.IsNullOrEmpty(cartridge.FilePath))
+            {
+                _ramFilePath = "";
+                _file = null;
+                return;
+            }
+
             _ramFilePath = Path.Combine(
                 Path.GetDirectoryName(cartridge.FilePath)!, 
                 Path.GetFileNameWithoutExtension(cartridge.FilePath) + ".sav");
@@ -18,6 +25,11 @@ namespace GB.Core.Memory.Cartridge.Battery
 
         public void LoadRam(int[] ram)
         {
+            if (_file is null)
+            {
+                return;
+            }
+
             _file.Seek(0, SeekOrigin.Begin);
             using var reader = new BinaryReader(_file, Encoding.UTF8, true);
             LoadRam(reader, ram);
@@ -25,6 +37,11 @@ namespace GB.Core.Memory.Cartridge.Battery
 
         public void LoadRamWithClock(int[] ram, long[] clockData)
         {
+            if (_file is null)
+            {
+                return;
+            }
+
             _file.Seek(0, SeekOrigin.Begin);
             using var reader = new BinaryReader(_file, Encoding.UTF8, true);
             LoadRam(reader, ram);
@@ -63,6 +80,11 @@ namespace GB.Core.Memory.Cartridge.Battery
 
         public void SaveRam(int[] ram)
         {
+            if (_file is null)
+            {
+                return;
+            }
+
             _file.Seek(0, SeekOrigin.Begin);
             using var writer = new BinaryWriter(_file, Encoding.UTF8, true);
             SaveRam(writer, ram);
@@ -70,6 +92,11 @@ namespace GB.Core.Memory.Cartridge.Battery
 
         public void SaveRamWithClock(int[] ram, long[] clockData)
         {
+            if (_file is null)
+            {
+                return;
+            }
+
             _file.Seek(0, SeekOrigin.Begin);
             using var writer = new BinaryWriter(_file, Encoding.UTF8, true);
             SaveRam(writer, ram);
@@ -106,6 +133,11 @@ namespace GB.Core.Memory.Cartridge.Battery
 
         public void Dispose()
         {
+            if (_file is null)
+            {
+                return;
+            }
+
             _file.Close();
             _file.Dispose();
         }
