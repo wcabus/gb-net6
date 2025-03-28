@@ -23,17 +23,27 @@ namespace GB.Core
         private readonly Sound.Sound _sound;
         private readonly SerialPort _serialPort;
 
-        private readonly bool _gbc;
-
         public bool Paused { get; set; }
 
-        public Gameboy(Cartridge cartridge, IDisplay display, IController controller, ISoundOutput soundOutput, ISerialEndpoint serialEndpoint, bool enableBootRom = true)
+        public Gameboy(Cartridge cartridge, IDisplay display, IController controller, ISoundOutput soundOutput, ISerialEndpoint serialEndpoint, bool enableBootRom = true, GameBoyMode gameBoyMode = GameBoyMode.AutoDetect)
         {
             _display = display;
-            _gbc = cartridge.IsGameboyColor;
+            var gbc = cartridge.IsGameboyColor;
+
+            switch (gameBoyMode)
+            {
+                case GameBoyMode.Color:
+                    gbc = true;
+                    break;
+                case GameBoyMode.DMG:
+                    // Force into Color mode for cartridges that don't support the DMG, use DMG mode for universal cartridges.
+                    gbc = cartridge.GameboyType == GameboyType.GameboyColor;
+                    break;
+            }
+
             var speedMode = new SpeedMode();
 
-            var interruptManager = new InterruptManager(_gbc);
+            var interruptManager = new InterruptManager(gbc);
 
             _timer = new Timer(interruptManager, speedMode);
             var mmu = new Mmu();
@@ -41,10 +51,10 @@ namespace GB.Core
             var oamRam = new Ram(0xFE00, 0x00A0);
             
             _dma = new Dma(mmu, oamRam, speedMode);
-            _gpu = new Gpu(_display, interruptManager, _dma, oamRam, _gbc);
+            _gpu = new Gpu(_display, interruptManager, _dma, oamRam, gbc);
             _hdma = new Hdma(mmu);
-            _sound = new Sound.Sound(soundOutput, _gbc);
-            _serialPort = new SerialPort(interruptManager, serialEndpoint, speedMode, _gbc);
+            _sound = new Sound.Sound(soundOutput, gbc);
+            _serialPort = new SerialPort(interruptManager, serialEndpoint, speedMode, gbc);
 
             mmu.AddCartridge(cartridge);
             mmu.AddGpu(_gpu);
@@ -56,7 +66,7 @@ namespace GB.Core
             mmu.AddSound(_sound);
 
             mmu.AddFirstRamBank(new Ram(0xC000, 0x1000));
-            if (_gbc)
+            if (gbc)
             {
                 mmu.AddSpeedMode(speedMode);
                 mmu.AddHdma(_hdma);
@@ -80,7 +90,7 @@ namespace GB.Core
                 return;
             }
 
-            _cpu.InitializeRegisters(_gbc);
+            _cpu.InitializeRegisters(gbc);
             cartridge.SetByte(0xFF50, 0xFF);
         }
 

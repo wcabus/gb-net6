@@ -1,4 +1,5 @@
-﻿using System.Drawing.Drawing2D;
+﻿using System.ComponentModel;
+using System.Drawing.Drawing2D;
 using GB.Core.Graphics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -7,7 +8,7 @@ using Image = System.Drawing.Image;
 
 namespace GB.WinForms.OsSpecific
 {
-    public class BitmapDisplay : Control, IDisplay
+    public sealed class BitmapDisplay : Control, IDisplay
     {
         public static readonly int DisplayWidth = 160;
         public static readonly int DisplayHeight = 144;
@@ -43,6 +44,7 @@ namespace GB.WinForms.OsSpecific
             set => DisplayEnabled = value;
         }
 
+        [DefaultValue(true)]
         public bool DisplayEnabled { get; set; }
 
         public void PutDmgPixel(int color)
