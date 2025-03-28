@@ -240,7 +240,7 @@ namespace GB.WinForms
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "MainForm";
-            this.Text = "GB.Net6";
+            this.Text = "GB.NET";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);

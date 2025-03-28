@@ -81,7 +81,7 @@ public class WebGame : IController, IDisposable
 
     public void OnKeyDown(string keyCode)
     {
-        var button = _controls.ContainsKey(keyCode) ? _controls[keyCode] : null;
+        var button = _controls.GetValueOrDefault(keyCode);
         if (button != null)
         {
             _listener?.OnButtonPress(button);
@@ -90,7 +90,7 @@ public class WebGame : IController, IDisposable
 
     public void OnKeyUp(string keyCode)
     {
-        var button = _controls.ContainsKey(keyCode) ? _controls[keyCode] : null;
+        var button = _controls.GetValueOrDefault(keyCode);
         if (button != null)
         {
             _listener?.OnButtonRelease(button);
@@ -121,10 +121,8 @@ public class WebDisplay : IDisplay
     private readonly byte[] _imageBuffer = new byte[DisplayWidth * DisplayHeight * 4];
 
     private bool _doStop;
-    private bool _doRefresh;
+    private int _doRefresh;
     private int _i;
-
-    private readonly object _lockObject = new();
 
     static WebDisplay()
     {
@@ -146,33 +144,19 @@ public class WebDisplay : IDisplay
     public void Run(CancellationToken token)
     {
         _doStop = false;
-        _doRefresh = false;
+        _doRefresh = 0;
         Enabled = true;
 
         while (!_doStop)
         {
-            lock (_lockObject)
-            {
-                try
-                {
-                    Monitor.Wait(_lockObject, 1);
-                }
-                catch (ThreadInterruptedException)
-                {
-                    break;
-                }
-            }
+            Thread.Sleep(1);
 
-            if (_doRefresh)
+            if (Interlocked.And(ref _doRefresh, 1) == 1)
             {
                 FillAndDrawBuffer();
 
-                lock (_lockObject)
-                {
-                    _i = 0;
-                    _doRefresh = false;
-                    Monitor.PulseAll(_lockObject);
-                }
+                _i = 0;
+                Interlocked.Exchange(ref _doRefresh, 0);
             }
 
             _doStop = token.IsCancellationRequested;
@@ -209,28 +193,14 @@ public class WebDisplay : IDisplay
 
     public void RequestRefresh()
     {
-        lock (_lockObject)
-        {
-            _doRefresh = true;
-            Monitor.PulseAll(_lockObject);
-        }
+        Interlocked.Exchange(ref _doRefresh, 1);
     }
 
     public void WaitForRefresh()
     {
-        lock (_lockObject)
+        while (Interlocked.And(ref _doRefresh, 1) == 1)
         {
-            while (_doRefresh)
-            {
-                try
-                {
-                    Monitor.Wait(_lockObject, 1);
-                }
-                catch (ThreadInterruptedException)
-                {
-                    break;
-                }
-            }
+            Thread.Sleep(1);
         }
     }
 
