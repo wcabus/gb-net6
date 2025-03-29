@@ -2,7 +2,7 @@
 
 namespace GB.Core.Graphics
 {
-    internal class IntQueue
+    internal sealed class IntQueue
     {
         private readonly List<int> _queue;
 
