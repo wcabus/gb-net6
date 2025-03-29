@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading;
+using System.Threading.Tasks;
 using GB.Core.Controller;
 using GB.Core.Graphics;
 using GB.Core.Gui;
@@ -249,15 +250,17 @@ public partial class Interop
     internal static partial void OutputImage(byte[] pixels, int width, int height);
 
     [JSExport]
-    internal static void KeyDown(string keyCode)
+    internal static Task KeyDown(string keyCode)
     {
         Game.OnKeyDown(keyCode);
+        return Task.CompletedTask;
     }
 
     [JSExport]
-    internal static void KeyUp(string keyCode)
+    internal static Task KeyUp(string keyCode)
     {
         Game.OnKeyUp(keyCode);
+        return Task.CompletedTask;
     }
 
     public static SynchronizationContext SynchronizationContext { get; set; }

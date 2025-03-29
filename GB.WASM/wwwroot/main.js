@@ -25,20 +25,20 @@ setModuleImports('main.js', {
 const config = getConfig();
 const exports = await getAssemblyExports(config.mainAssemblyName);
 
-window.addEventListener('keydown', (e) => {
+window.addEventListener('keydown', async (e) => {
     if (e.isComposing || e.keyCode === 229) {
         return;
     }
 
-    exports.Interop.KeyDown(e.code);
+    await exports.Interop.KeyDown(e.code);
 });
 
-window.addEventListener('keyup', (e) => {
+window.addEventListener('keyup', async (e) => {
     if (e.isComposing || e.keyCode === 229) {
         return;
     }
 
-    exports.Interop.KeyUp(e.code);
+    await exports.Interop.KeyUp(e.code);
 });
 
 await runMain();
