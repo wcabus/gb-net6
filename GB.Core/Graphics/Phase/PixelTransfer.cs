@@ -9,7 +9,7 @@ namespace GB.Core.Graphics.Phase
         private readonly MemoryRegisters _r;
         private readonly Lcdc _lcdc;
         private readonly bool _gbc;
-        private OamSearch.SpritePosition?[] _sprites = Array.Empty<OamSearch.SpritePosition?>();
+        private OamSearch.SpritePosition?[] _sprites = [];
         private int _droppedPixels;
         private int _x;
         private bool _window;
@@ -89,16 +89,16 @@ namespace GB.Core.Graphics.Phase
                         continue;
                     }
 
-                    if (_x == 0 && s.X < 8)
+                    if (_x == 0 && s.Value.X < 8)
                     {
-                        _fetcher.AddSprite(s, 8 - s.X, i);
+                        _fetcher.AddSprite(s.Value, 8 - s.Value.X, i);
                         spriteAdded = true;
 
                         _sprites[i] = null;
                     }
-                    else if (s.X - 8 == _x)
+                    else if (s.Value.X - 8 == _x)
                     {
-                        _fetcher.AddSprite(s, 0, i);
+                        _fetcher.AddSprite(s.Value, 0, i);
                         spriteAdded = true;
 
                         _sprites[i] = null;

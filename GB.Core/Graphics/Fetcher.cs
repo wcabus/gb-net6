@@ -166,12 +166,12 @@ namespace GB.Core.Graphics
                     break;
 
                 case State.ReadSpriteTileId:
-                    _tileId = _oemRam.GetByte(_sprite!.Address + 2);
+                    _tileId = _oemRam.GetByte(_sprite!.Value.Address + 2);
                     _state = State.ReadSpriteFlags;
                     break;
 
                 case State.ReadSpriteFlags:
-                    _spriteAttributes = TileAttributes.ValueOf(_oemRam.GetByte(_sprite!.Address + 3));
+                    _spriteAttributes = TileAttributes.ValueOf(_oemRam.GetByte(_sprite!.Value.Address + 3));
                     _state = State.ReadSpriteData1;
                     break;
 
