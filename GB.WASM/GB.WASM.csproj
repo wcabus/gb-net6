@@ -3,10 +3,17 @@
     <TargetFramework>net9.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WasmEnableThreads>true</WasmEnableThreads>
+    <InvariantTimezone>true</InvariantTimezone>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <EnableAggressiveTrimming>true</EnableAggressiveTrimming>
+    <DebuggerSupport>false</DebuggerSupport>
+    <MetricsSupport>false</MetricsSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
 
     <RunAOTCompilation>true</RunAOTCompilation>
-    <WasmEnableSIMD>true</WasmEnableSIMD>
     <!--
+    <WasmEmitSourceMap>true</WasmEmitSourceMap>
+    <WasmProfilers>browser;</WasmProfilers>
     <WasmNativeDebugSymbols>true</WasmNativeDebugSymbols>
     <WasmNativeStrip>false</WasmNativeStrip>
     -->

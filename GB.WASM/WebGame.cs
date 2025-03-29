@@ -38,6 +38,7 @@ public sealed class WebGame : IController, IDisposable
             {"KeyS", Button.Down},
             {"ArrowDown", Button.Down},
             {"KeyK", Button.A},
+            {"Space", Button.A},
             {"KeyO", Button.B},
             {"Enter", Button.Start},
             {"Backspace", Button.Select}
